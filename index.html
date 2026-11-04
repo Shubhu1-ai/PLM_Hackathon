@@ -3,856 +3,1147 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3DEXPERIENCE PLM Intelligence Platform | Automotive Engineering</title>
-  <meta name="description" content="AI-Powered PLM Analytics & Change Impact Engine for Automotive Electric Motors. Built for ESILV Hackathon.">
+  <title>PLM Intelligence | 3DEXPERIENCE Engineering Cockpit</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
-      --primary: #2563EB;
-      --primary-hover: #1D4ED8;
-      --accent-cyan: #06B6D4;
-      --accent-emerald: #10B981;
+      --dassault-blue: #005686;
+      --dassault-dark: #003B5C;
+      --dassault-light: #EBF4F9;
+      --bg-gray: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --border-color: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --accent-red: #EF4444;
+      --accent-green: #10B981;
       --accent-amber: #F59E0B;
-      --accent-rose: #F43F5E;
-      --bg-dark: #0B0F19;
-      --bg-card: #111827;
-      --border-dark: #1F2937;
-      --border-subtle: #374151;
-      --text-main: #F9FAFB;
-      --text-muted: #9CA3AF;
-      --code-bg: #1E293B;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     body {
-      background-color: var(--bg-dark);
+      background-color: var(--bg-gray);
       color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* Container */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    /* Navbar */
-    nav {
-      border-bottom: 1px solid var(--border-dark);
-      background: rgba(11, 15, 25, 0.85);
-      backdrop-filter: blur(12px);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    .nav-inner {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 72px;
+      height: 100vh;
+      overflow: hidden;
     }
-    .brand {
+
+    /* 3DEXPERIENCE Sidebar */
+    .sidebar {
+      width: 270px;
+      background: #FFFFFF;
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+
+    .compass-brand {
+      padding: 1.25rem 1.25rem 1rem;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
       gap: 12px;
-      font-weight: 700;
-      font-size: 1.25rem;
-      letter-spacing: -0.02em;
     }
-    .brand-badge {
-      background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
-      padding: 6px 10px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      color: #fff;
-      font-weight: 800;
-    }
-    .nav-links {
+    .compass-logo {
+      width: 42px;
+      height: 42px;
+      background: var(--dassault-blue);
+      border-radius: 10px;
       display: flex;
       align-items: center;
-      gap: 1.5rem;
-    }
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: color 0.2s ease;
-    }
-    .nav-links a:hover {
-      color: #fff;
-    }
-    .btn-github {
-      background: #1F2937;
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid var(--border-subtle);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s;
-    }
-    .btn-github:hover {
-      background: #374151;
-      border-color: #4B5563;
-    }
-
-    /* Hero Section */
-    .hero {
-      padding: 5rem 0 3.5rem;
-      text-align: center;
-      position: relative;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 0%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 350px;
-      background: radial-gradient(circle, rgba(37,99,235,0.18) 0%, rgba(11,15,25,0) 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(37, 99, 235, 0.12);
-      border: 1px solid rgba(37, 99, 235, 0.3);
-      padding: 6px 16px;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #60A5FA;
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(135deg, #FFFFFF 30%, #94A3B8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero p {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 820px;
-      margin: 0 auto 2.5rem;
-      font-weight: 400;
-    }
-    .hero-actions {
-      display: flex;
       justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
+      font-size: 22px;
+      color: #fff;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0, 86, 134, 0.2);
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #1D4ED8);
-      color: white;
-      padding: 12px 28px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
-      box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4);
-      transition: all 0.2s;
+    .brand-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--dassault-blue);
+      line-height: 1.2;
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 24px -5px rgba(37, 99, 235, 0.6);
-    }
-    .btn-secondary {
-      background: var(--bg-card);
-      color: var(--text-main);
-      padding: 12px 28px;
-      border-radius: 10px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
-      border: 1px solid var(--border-dark);
-      transition: all 0.2s;
-    }
-    .btn-secondary:hover {
-      background: #1F2937;
-      border-color: var(--border-subtle);
-    }
-
-    /* KPI Metrics Ribbon */
-    .metrics-ribbon {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-      margin: 3.5rem 0;
-    }
-    .metric-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-dark);
-      border-radius: 14px;
-      padding: 1.5rem;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .metric-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--border-subtle);
-    }
-    .metric-label {
-      font-size: 0.85rem;
+    .brand-subtitle {
+      font-size: 0.72rem;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    .metric-value {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .metric-subtitle {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.35rem;
     }
 
-    /* Features Grid */
-    .section-title {
-      font-size: 2.25rem;
+    .nav-section-title {
+      padding: 1.25rem 1.25rem 0.5rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      text-align: center;
-      margin-bottom: 0.75rem;
-    }
-    .section-desc {
-      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--text-muted);
-      max-width: 650px;
-      margin: 0 auto 3rem;
-      font-size: 1.05rem;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 1.5rem;
-      margin-bottom: 4rem;
-    }
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-dark);
-      border-radius: 16px;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.25s ease;
-    }
-    .feature-card:hover {
-      border-color: rgba(37, 99, 235, 0.4);
-      transform: translateY(-4px);
-    }
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 1.25rem;
-      display: inline-block;
-      padding: 12px;
-      background: rgba(37, 99, 235, 0.1);
-      border-radius: 12px;
-      border: 1px solid rgba(37, 99, 235, 0.2);
-    }
-    .feature-card h3 {
-      font-size: 1.3rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-    }
-    .feature-card p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
     }
 
-    /* Architecture Section */
-    .architecture-box {
-      background: var(--bg-card);
-      border: 1px solid var(--border-dark);
-      border-radius: 16px;
-      padding: 2.5rem;
-      margin-bottom: 4rem;
+    .nav-list {
+      list-style: none;
+      padding: 0 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
     }
-    .arch-flow {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
-      position: relative;
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
     }
-    .arch-step {
-      background: #1A2234;
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 1.5rem;
+    .nav-item:hover {
+      background: var(--dassault-light);
+      color: var(--dassault-blue);
     }
-    .step-num {
-      background: var(--primary);
-      color: white;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
+    .nav-item.active {
+      background: var(--dassault-light);
+      color: var(--dassault-blue);
+      font-weight: 700;
+      border-left: 4px solid var(--dassault-blue);
+    }
+    .nav-icon {
+      font-size: 1.1rem;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1.25rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #FAFAFA;
+    }
+    .status-badge {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
+      gap: 6px;
+      background: #ECFDF5;
+      color: #065F46;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+      font-size: 0.72rem;
+      margin-top: 6px;
     }
-    .arch-step h4 {
-      font-size: 1.1rem;
-      margin-bottom: 0.5rem;
-    }
-    .arch-step p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    /* Code Quickstart */
-    .quickstart-box {
-      background: #0D1117;
-      border: 1px solid var(--border-dark);
-      border-radius: 16px;
-      padding: 2.5rem;
-      margin-bottom: 5rem;
-    }
-    pre {
-      background: var(--code-bg);
-      border: 1px solid var(--border-dark);
-      border-radius: 10px;
-      padding: 1.25rem;
-      overflow-x: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      color: #E2E8F0;
-      margin-top: 1rem;
-    }
-
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border-dark);
-      padding: 2.5rem 0;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-
-    /* Floating Chat Widget */
-    .plm-chat-button {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      width: 60px;
-      height: 60px;
+    .status-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--primary), #1D4ED8);
-      color: #ffffff;
-      border: none;
-      box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.5);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-      transition: transform 0.25s, box-shadow 0.25s;
-      z-index: 99999;
-    }
-    .plm-chat-button:hover {
-      transform: scale(1.08);
-      box-shadow: 0 14px 28px -5px rgba(37, 99, 235, 0.7);
+      background: var(--accent-green);
     }
 
-    .plm-chat-window {
-      position: fixed;
-      bottom: 100px;
-      right: 28px;
-      width: 420px;
-      max-width: calc(100vw - 40px);
-      height: 620px;
-      max-height: calc(100vh - 120px);
-      background: #FFFFFF;
-      color: #0F172A;
-      border-radius: 16px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    /* Main Content Area */
+    .main-wrapper {
+      flex: 1;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      z-index: 99999;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(20px) scale(0.95);
-    }
-    .plm-chat-window.open {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0) scale(1);
+      background: var(--bg-gray);
     }
 
-    .chat-header {
+    /* Top Application Bar */
+    .topbar {
+      height: 64px;
       background: #FFFFFF;
-      border-bottom: 1px solid #E2E8F0;
-      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
+      padding: 0 2rem;
+      flex-shrink: 0;
     }
-    .chat-title-group {
+    .topbar-left {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 16px;
     }
-    .chat-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      color: white;
-    }
-    .chat-header h4 {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #0F172A;
-    }
-    .chat-status {
-      font-size: 0.75rem;
-      color: var(--accent-emerald);
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .system-pill {
+      background: var(--dassault-light);
+      color: var(--dassault-blue);
+      border: 1px solid #BFDBFE;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
       font-weight: 600;
     }
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent-emerald);
-      display: inline-block;
-    }
-    .chat-close-btn {
-      background: transparent;
-      border: none;
-      font-size: 20px;
-      color: #94A3B8;
-      cursor: pointer;
-      line-height: 1;
-      padding: 4px;
-    }
-    .chat-close-btn:hover {
-      color: #0F172A;
-    }
-
-    .chat-body {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      background: #F8FAFC;
+    .topbar-right {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      align-items: center;
+      gap: 14px;
     }
-    .msg {
-      max-width: 88%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      font-size: 0.88rem;
-      line-height: 1.5;
-    }
-    .msg-bot {
-      background: #FFFFFF;
-      color: #1E293B;
-      border: 1px solid #E2E8F0;
-      align-self: flex-start;
-      border-bottom-left-radius: 4px;
-    }
-    .msg-user {
-      background: var(--primary);
-      color: #FFFFFF;
-      align-self: flex-end;
-      border-bottom-right-radius: 4px;
-    }
-
-    .quick-pill-container {
-      display: flex;
-      flex-wrap: wrap;
+    .btn-repo {
+      display: inline-flex;
+      align-items: center;
       gap: 6px;
-      margin-top: 8px;
+      padding: 7px 14px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
     }
-    .quick-pill {
-      background: #EFF6FF;
-      color: var(--primary);
-      border: 1px solid #DBEAFE;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      font-weight: 500;
-      transition: background 0.15s;
-    }
-    .quick-pill:hover {
-      background: #DBEAFE;
+    .btn-repo:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
     }
 
-    .chat-footer {
-      padding: 12px 16px;
-      border-top: 1px solid #E2E8F0;
-      background: #FFFFFF;
+    /* View Content Scrollable */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .view-panel {
+      display: none;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    .view-panel.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .view-header {
+      margin-bottom: 1.5rem;
+    }
+    .view-header h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--dassault-blue);
+      letter-spacing: -0.02em;
+    }
+    .view-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    /* Widget Card */
+    .widget-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 6px rgba(0, 86, 134, 0.05);
+    }
+    .widget-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--dassault-blue);
+      margin-bottom: 1rem;
       display: flex;
+      align-items: center;
       gap: 8px;
     }
-    .chat-footer input {
+
+    /* KPI Metrics Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .kpi-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .kpi-val {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--dassault-blue);
+      line-height: 1.1;
+    }
+    .kpi-delta {
+      font-size: 0.8rem;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+    .delta-risk { color: var(--accent-red); font-weight: 600; }
+    .delta-ok { color: var(--accent-green); font-weight: 600; }
+
+    /* Slicers Row */
+    .slicers-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .slicer-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .slicer-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+      background: #FFFFFF;
+    }
+    .slicer-group select:focus {
+      border-color: var(--dassault-blue);
+    }
+
+    /* Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .chart-container {
+      position: relative;
+      height: 320px;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      max-height: 400px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    th {
+      background: #F1F5F9;
+      color: #334155;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+    }
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #F1F5F9;
+      color: #1E293B;
+    }
+    tr:hover td {
+      background: #F8FAFC;
+    }
+    .tag-missing {
+      background: #FEE2E2;
+      color: #991B1B;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+    .tag-ok {
+      background: #E0F2FE;
+      color: #0369A1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    /* Tree View */
+    .tree-node {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #FFFFFF;
+      overflow: hidden;
+    }
+    .tree-header {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+      background: #FFFFFF;
+      transition: background 0.15s;
+    }
+    .tree-header:hover {
+      background: #F8FAFC;
+    }
+    .tree-title {
+      font-weight: 600;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tree-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .tree-children {
+      padding: 10px 16px 14px 28px;
+      border-top: 1px solid #F1F5F9;
+      background: #FAFAFA;
+      display: none;
+    }
+    .tree-children.open {
+      display: block;
+    }
+
+    /* Change Impact Form */
+    .impact-form-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 1.25rem;
+      align-items: flex-end;
+      margin-bottom: 1.5rem;
+    }
+    .impact-form-grid label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .impact-form-grid select,
+    .impact-form-grid input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .btn-run {
+      background: var(--dassault-blue);
+      color: #FFFFFF;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: background 0.15s;
+      width: 100%;
+    }
+    .btn-run:hover {
+      background: var(--dassault-dark);
+    }
+
+    /* Copilot Chat */
+    .chat-layout {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: #F8FAFC;
+    }
+    .chat-bubble {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+    .chat-bubble.bot {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      align-self: flex-start;
+      border-bottom-left-radius: 2px;
+    }
+    .chat-bubble.user {
+      background: var(--dassault-blue);
+      color: #FFFFFF;
+      align-self: flex-end;
+      border-bottom-right-radius: 2px;
+    }
+    .chat-input-bar {
+      padding: 1rem;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+    .chat-input-bar input {
       flex: 1;
       padding: 10px 14px;
       border: 1px solid #CBD5E1;
       border-radius: 8px;
-      font-size: 0.88rem;
+      font-size: 0.9rem;
       outline: none;
-      color: #0F172A;
     }
-    .chat-footer input:focus {
-      border-color: var(--primary);
+    .chat-input-bar input:focus {
+      border-color: var(--dassault-blue);
     }
-    .chat-footer button {
-      background: var(--primary);
+    .chat-input-bar button {
+      background: var(--dassault-blue);
       color: white;
       border: none;
+      padding: 0 18px;
       border-radius: 8px;
-      padding: 0 16px;
       font-weight: 600;
       cursor: pointer;
-      font-size: 0.9rem;
     }
-    .chat-footer button:hover {
-      background: var(--primary-hover);
+    .quick-prompts {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .prompt-chip {
+      background: #EBF4F9;
+      color: var(--dassault-blue);
+      border: 1px solid #BFDBFE;
+      padding: 4px 10px;
+      border-radius: 16px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .prompt-chip:hover {
+      background: #DBEAFE;
     }
   </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav>
-    <div class="container nav-inner">
-      <div class="brand">
-        <span class="brand-badge">PLM 3DEXPERIENCE</span>
-        <span>Intelligence Platform</span>
+  <!-- 3DEXPERIENCE Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="compass-brand">
+      <div class="compass-logo">🧭</div>
+      <div>
+        <div class="brand-title">3DEXPERIENCE</div>
+        <div class="brand-subtitle">PLM Intelligence Platform</div>
       </div>
-      <div class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#quickstart">Quickstart</a>
-        <a class="btn-github" href="https://github.com/Shubhu1-ai/PLM_Hackathon" target="_blank" rel="noopener">
-          <svg height="18" width="18" viewBox="0 0 16 16" fill="currentColor">
+    </div>
+
+    <div class="nav-section-title">Compass Applications</div>
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchView('view-dash', this)">
+        <span class="nav-icon">📊</span>
+        <span>Dashboard & Analytics</span>
+      </li>
+      <li class="nav-item" onclick="switchView('view-bom', this)">
+        <span class="nav-icon">🌳</span>
+        <span>Product Structure (BOM)</span>
+      </li>
+      <li class="nav-item" onclick="switchView('view-impact', this)">
+        <span class="nav-icon">🔄</span>
+        <span>Change Impact Analysis</span>
+      </li>
+      <li class="nav-item" onclick="switchView('view-copilot', this)">
+        <span class="nav-icon">🤖</span>
+        <span>AI Engineering Copilot</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div style="font-weight: 700; color: var(--dassault-blue); margin-bottom: 2px;">410 kW Electric Drive</div>
+      <div>Assembly: <code>ECAR-EI_FRONT</code></div>
+      <div>Ref Mass: <b>100.100 kg</b></div>
+      <div class="status-badge"><span class="status-dot"></span> 3DEXPERIENCE Connected</div>
+    </div>
+  </aside>
+
+  <!-- Main Content Viewport -->
+  <div class="main-wrapper">
+    <!-- Top Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="system-pill">⚡ ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</span>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">Maturity: <b>IN_WORK</b> | Rev: <b>D</b></span>
+      </div>
+      <div class="topbar-right">
+        <a class="btn-repo" href="https://github.com/Shubhu1-ai/PLM_Hackathon" target="_blank">
+          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
           </svg>
-          GitHub Repository
+          GitHub Repo
         </a>
       </div>
-    </div>
-  </nav>
+    </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="container">
-      <div class="hero-badge">⚡ Automotive Engineering Intelligence Challenge</div>
-      <h1>Transforms Raw 3DEXPERIENCE PLM XML<br>into Executive Engineering Action</h1>
-      <p>
-        An enterprise-grade analytics dashboard and change impact simulator for the 410 kW Electric Drive Front Assembly.
-        Features Power BI slicers, recursive BOM rollups, upstream Where-Used graph traversals, and an offline AI agent.
-      </p>
-      <div class="hero-actions">
-        <a href="#quickstart" class="btn-primary">Launch Locally (Streamlit)</a>
-        <a href="https://github.com/Shubhu1-ai/PLM_Hackathon" target="_blank" rel="noopener" class="btn-secondary">View on GitHub</a>
-      </div>
-    </div>
-  </section>
+    <div class="content-area">
 
-  <!-- Metrics Ribbon -->
-  <section class="container">
-    <div class="metrics-ribbon">
-      <div class="metric-card">
-        <div class="metric-label">Root Assembly Mass</div>
-        <div class="metric-value" style="color: #60A5FA;">100.100 kg</div>
-        <div class="metric-subtitle">ECAR-EI_410KW_EDRIVE_FRONT</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Total Unique Products</div>
-        <div class="metric-value">79 Parts</div>
-        <div class="metric-subtitle">112 Assembly Instances</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">BOM Tree Complexity</div>
-        <div class="metric-value" style="color: var(--accent-cyan);">144 Nodes</div>
-        <div class="metric-subtitle">Multi-level assembly depth</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Missing Material Risk</div>
-        <div class="metric-value" style="color: var(--accent-amber);">6 Parts</div>
-        <div class="metric-subtitle">CAE / Compliance Alert</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Maturity Status</div>
-        <div class="metric-value" style="color: var(--accent-rose);">100% IN_WORK</div>
-        <div class="metric-subtitle">Zero Released Components</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Grid -->
-  <section class="container" id="features">
-    <h2 class="section-title">Engineering Core Capabilities</h2>
-    <p class="section-desc">Designed to address the 48-hour PLM Hackathon challenge for Tier-1 automotive electrification teams.</p>
-
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>Interactive Power BI Dashboard</h3>
-        <p>Dynamic sidebar slicers for Material, Maturity, and Mass thresholds. Features Plotly Sunburst drill-downs, material distribution bars, and top-10 mass Pareto drivers.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">🌳</div>
-        <h3>Multi-Level BOM Product Explorer</h3>
-        <p>Hierarchical tree navigation mapping subassemblies to leaf components. Includes CAD metadata inspector showing PLM IDs, revisions, organizations, and recursive assembly mass rollups.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">🔄</div>
-        <h3>Change Impact Analysis (Where-Used)</h3>
-        <p>Bottom-up BFS graph traversal detecting all upstream parent assemblies affected when modifying a leaf component. Computes projected system weight deltas in real-time.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">⚠️</div>
-        <h3>Risk & Compliance Intelligence</h3>
-        <p>Instant auditing of unassigned material properties (REACH/RoHS compliance risk) and lifecycle freeze alerts (100% of components currently in IN_WORK state).</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">🤖</div>
-        <h3>Native PLM AI Assistant (100% Offline)</h3>
-        <p>Autonomous engineering assistant providing instant technical answers grounded strictly in your BOM data. Cites verified PLM IDs for every component with zero external API dependencies.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon">⚡</div>
-        <h3>High-Performance SQLite Engine</h3>
-        <p>In-memory relational schema with B-Tree indexes on foreign keys, parsing 2,500+ lines of 3DEXPERIENCE XPDMXML into indexed tables in under 150 milliseconds.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Architecture -->
-  <section class="container" id="architecture">
-    <div class="architecture-box">
-      <h2 class="section-title" style="text-align: left;">System Architecture</h2>
-      <p style="color: var(--text-muted);">End-to-end data pipeline from 3DEXPERIENCE XML extraction to interactive executive dashboard.</p>
-
-      <div class="arch-flow">
-        <div class="arch-step">
-          <div class="step-num">1</div>
-          <h4>Raw XML Ingestion</h4>
-          <p>Parses <code>XPDMXML_ECAR_PLM.xml</code> using <code>plm_parser.py</code>, extracting <code>&lt;Product&gt;</code> and <code>&lt;ProductInst&gt;</code> elements.</p>
+      <!-- VIEW 1: DASHBOARD & ANALYTICS -->
+      <section id="view-dash" class="view-panel active">
+        <div class="view-header">
+          <h1>📊 Executive Dashboard & Analytics</h1>
+          <p>Real-time engineering KPIs, mass distribution treemaps, and material compliance audits.</p>
         </div>
 
-        <div class="arch-step">
-          <div class="step-num">2</div>
-          <h4>Relational In-Memory Index</h4>
-          <p>Normalizes entities into SQLite with B-tree indexed foreign keys for sub-millisecond parent-child lookups.</p>
+        <!-- Slicers Card -->
+        <div class="widget-card">
+          <div class="widget-title">🎛️ Power BI Data Slicers</div>
+          <div class="slicers-row">
+            <div class="slicer-group">
+              <label for="materialSlicer">Filter by Material:</label>
+              <select id="materialSlicer" onchange="filterData()">
+                <option value="ALL">All Materials (Entire Assembly)</option>
+                <option value="Aluminium">Aluminium (10 parts)</option>
+                <option value="Steel">Steel (50+ parts)</option>
+                <option value="Copper">Copper (Windings & Busbars)</option>
+                <option value="MISSING">⚠️ Missing / Unassigned (6 parts)</option>
+              </select>
+            </div>
+            <div class="slicer-group">
+              <label for="maturitySlicer">Filter by Maturity State:</label>
+              <select id="maturitySlicer" onchange="filterData()">
+                <option value="ALL">All States (100% IN_WORK)</option>
+                <option value="IN_WORK">IN_WORK (79 items)</option>
+                <option value="RELEASED">RELEASED (0 items)</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-        <div class="arch-step">
-          <div class="step-num">3</div>
-          <h4>Graph & Mass Engine</h4>
-          <p><code>plm_logic.py</code> computes recursive BOM depth-first traversal, bottom-up BFS Where-Used impact propagation, and mass rollups.</p>
+        <!-- KPI Row -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Total System Mass</div>
+            <div class="kpi-val" id="kpiMass">100.100 kg</div>
+            <div class="kpi-delta delta-ok">Root: ECAR-EI_FRONT</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Unique Components</div>
+            <div class="kpi-val" id="kpiParts">79 Parts</div>
+            <div class="kpi-delta delta-ok">112 Assembly Instances</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Missing Material Risk</div>
+            <div class="kpi-val" style="color: var(--accent-red);" id="kpiMissing">6 Parts</div>
+            <div class="kpi-delta delta-risk">CAE / Compliance Alert</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Lifecycle Status</div>
+            <div class="kpi-val" style="color: var(--accent-amber);" id="kpiMaturity">100% IN_WORK</div>
+            <div class="kpi-delta delta-risk">0% RELEASED (Freeze Risk)</div>
+          </div>
         </div>
 
-        <div class="arch-step">
-          <div class="step-num">4</div>
-          <h4>Streamlit & AI UI</h4>
-          <p>Power BI-style unified dashboard in <code>app.py</code> with 5 interactive tabs, Plotly charts, and offline PLM AI assistant.</p>
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="widget-card">
+            <div class="widget-title">⚖️ Subassembly Mass Breakdown</div>
+            <div class="chart-container">
+              <canvas id="massPieChart"></canvas>
+            </div>
+          </div>
+          <div class="widget-card">
+            <div class="widget-title">📊 Component Frequency by Material</div>
+            <div class="chart-container">
+              <canvas id="materialBarChart"></canvas>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Quickstart -->
-  <section class="container" id="quickstart">
-    <div class="quickstart-box">
-      <h2 class="section-title" style="text-align: left;">Run the Application Locally</h2>
-      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Clone the repository and launch the full interactive Streamlit dashboard in under a minute:</p>
-
-      <pre><code># 1. Clone the repository
-git clone https://github.com/Shubhu1-ai/PLM_Hackathon.git
-cd PLM_Hackathon
-
-# 2. Install standard dependencies
-pip install -r requirements.txt
-
-# 3. Launch the Streamlit application
-streamlit run app.py</code></pre>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <p>3DEXPERIENCE PLM Intelligence Platform • Built for the Automotive Engineering Hackathon • MIT License</p>
-    </div>
-  </footer>
-
-  <!-- Floating AI Assistant Launcher -->
-  <button class="plm-chat-button" id="chatLauncher" title="Open PLM AI Assistant">🤖</button>
-
-  <!-- Floating Chat Window (Pure Client-side Live Demo) -->
-  <div class="plm-chat-window" id="chatWindow">
-    <div class="chat-header">
-      <div class="chat-title-group">
-        <div class="chat-avatar">🤖</div>
-        <div>
-          <h4>PLM Engineering AI</h4>
-          <div class="chat-status"><span class="status-dot"></span> Offline Reasoner Active</div>
+        <!-- Master Data Table -->
+        <div class="widget-card">
+          <div class="widget-title">📋 Component Master Table (3DEXPERIENCE Export)</div>
+          <div class="table-container">
+            <table id="productsTable">
+              <thead>
+                <tr>
+                  <th>Component Name</th>
+                  <th>PLM ID</th>
+                  <th>Rev</th>
+                  <th>Maturity</th>
+                  <th>Mass (kg)</th>
+                  <th>Material</th>
+                  <th>Organization</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <button class="chat-close-btn" id="closeBtn">&times;</button>
-    </div>
+      </section>
 
-    <div class="chat-body" id="chatBody">
-      <div class="msg msg-bot">
-        👋 Hello! I am your <b>PLM Engineering AI Assistant</b>.<br><br>
-        I analyze the 3DEXPERIENCE BOM structure for <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> with guaranteed traceability.<br><br>
-        Click a prompt below or type your question:
-        <div class="quick-pill-container">
-          <span class="quick-pill" onclick="sendPrompt('What parts use Aluminium?')">🔩 Parts using Aluminium</span>
-          <span class="quick-pill" onclick="sendPrompt('Show me the heaviest component.')">⚖️ Heaviest component</span>
-          <span class="quick-pill" onclick="sendPrompt('Are there any missing materials?')">🚨 Missing materials</span>
-          <span class="quick-pill" onclick="sendPrompt('What are the major subassemblies?')">🏗️ Major subassemblies</span>
+      <!-- VIEW 2: PRODUCT STRUCTURE (BOM) -->
+      <section id="view-bom" class="view-panel">
+        <div class="view-header">
+          <h1>🌳 Product Structure (Multi-Level BOM)</h1>
+          <p>Hierarchical expansion of the 410 kW Electric Drive Front Assembly with CAD property inspection.</p>
         </div>
-      </div>
-    </div>
 
-    <div class="chat-footer">
-      <input type="text" id="userInput" placeholder="Ask a technical BOM question..." />
-      <button id="sendBtn">Send</button>
+        <div class="widget-card">
+          <div class="widget-title">🔍 Interactive BOM Search & Inspector</div>
+          <input type="text" id="bomSearch" placeholder="Type component name or PLM ID (e.g., STATOR, HOUSING, prd-12535825-00000085)..." oninput="searchBOM()" style="width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 0.95rem; outline: none;" />
+        </div>
+
+        <div class="widget-card" id="bomContainer">
+          <!-- Multi-level tree nodes -->
+          <div class="tree-node">
+            <div class="tree-header" onclick="toggleTreeNode(this)">
+              <div class="tree-title">📁 ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</div>
+              <div class="tree-meta">Declared Mass: <b>100.100 kg</b> | Rev D | IN_WORK</div>
+            </div>
+            <div class="tree-children open">
+              
+              <!-- Subassembly 1: E-Motor -->
+              <div class="tree-node">
+                <div class="tree-header" onclick="toggleTreeNode(this)">
+                  <div class="tree-title">📁 [inst_1] ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</div>
+                  <div class="tree-meta">Subassembly: <b>39.730 kg</b> (39.7%)</div>
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_STATOR_STACK (prd-12535825-00000085)</div><div class="tree-meta">14.200 kg | Steel</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_ROTOR_ASSEMBLY (prd-12535825-00000086)</div><div class="tree-meta">12.500 kg | Steel / Magnets</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COPPER_WINDINGS (prd-12535825-00000087)</div><div class="tree-meta">7.850 kg | Copper</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_MOTOR_SHAFT (prd-12535825-00000088)</div><div class="tree-meta">3.650 kg | Steel</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subassembly 2: Housing -->
+              <div class="tree-node">
+                <div class="tree-header" onclick="toggleTreeNode(this)">
+                  <div class="tree-title">📁 [inst_2] ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</div>
+                  <div class="tree-meta">Subassembly: <b>30.520 kg</b> (30.5%)</div>
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</div><div class="tree-meta">12.180 kg | Aluminium</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_REAR HOUSING (prd-12535825-00000055)</div><div class="tree-meta">13.780 kg | Aluminium</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_BEARING CARRIER (prd-12535825-00000056)</div><div class="tree-meta">2.450 kg | Aluminium</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER FRONT (prd-12535825-00000057)</div><div class="tree-meta">0.940 kg | Aluminium</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER REAR (prd-12535825-00000058)</div><div class="tree-meta">1.170 kg | Aluminium</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Subassembly 3: Reducer -->
+              <div class="tree-node">
+                <div class="tree-header" onclick="toggleTreeNode(this)">
+                  <div class="tree-title">📁 [inst_3] ECAR-EI_REDUCER FRONT (prd-12535825-00000049)</div>
+                  <div class="tree-meta">Subassembly: <b>29.850 kg</b> (29.8%)</div>
+                </div>
+                <div class="tree-children">
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_PLANETARY_CARRIER (prd-12535825-00000060)</div><div class="tree-meta">8.420 kg | Steel</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_SUN_GEAR (prd-12535825-00000061)</div><div class="tree-meta">3.120 kg | Steel</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_RING_GEAR (prd-12535825-00000062)</div><div class="tree-meta">7.200 kg | Steel</div></div>
+                  </div>
+                  <div class="tree-node">
+                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_DIFFERENTIAL (prd-12535825-00000063)</div><div class="tree-meta">9.110 kg | Steel</div></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: CHANGE IMPACT ANALYSIS -->
+      <section id="view-impact" class="view-panel">
+        <div class="view-header">
+          <h1>🔄 Engineering Change Impact Analysis</h1>
+          <p>Simulate Engineering Change Orders (ECO) with reverse Where-Used graph traversal and mass deltas.</p>
+        </div>
+
+        <div class="widget-card">
+          <div class="widget-title">🎯 Component Substitution Simulation</div>
+          <div class="impact-form-grid">
+            <div>
+              <label for="impactSelect">Target Component to Modify/Replace:</label>
+              <select id="impactSelect" onchange="updateImpactInputs()">
+                <option value="BEA3" data-mass="0.450" data-plm="prd-12535825-00000081">ECAR-3D_HSH_BEA3 (Bearing 3) — prd-12535825-00000081</option>
+                <option value="HOUSING_FRONT" data-mass="12.180" data-plm="prd-12535825-00000054">ECAR-EI_FRONT HOUSING — prd-12535825-00000054</option>
+                <option value="STATOR" data-mass="14.200" data-plm="prd-12535825-00000085">ECAR-EI_STATOR_STACK — prd-12535825-00000085</option>
+                <option value="WINDINGS" data-mass="7.850" data-plm="prd-12535825-00000087">ECAR-EI_COPPER_WINDINGS — prd-12535825-00000087</option>
+              </select>
+            </div>
+            <div>
+              <label>Current Mass (kg):</label>
+              <input type="text" id="curMass" value="0.450" disabled style="background:#F1F5F9; color:#64748B;" />
+            </div>
+            <div>
+              <label for="propMass">Proposed New Mass (kg):</label>
+              <input type="number" id="propMass" value="0.320" step="0.01" />
+            </div>
+          </div>
+          <button class="btn-run" onclick="runSimulation()">🚀 Run Impact Traversal</button>
+        </div>
+
+        <div class="widget-card" id="simResultsCard" style="display: none;">
+          <div class="widget-title">📈 Change Impact Simulation Results</div>
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-label">Affected Parent Assemblies</div>
+              <div class="kpi-val" id="resParents">2 Assemblies</div>
+              <div class="kpi-delta delta-risk">Direct & Upstream Impact</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Single Part Mass Delta</div>
+              <div class="kpi-val" id="resDelta">-0.130 kg</div>
+              <div class="kpi-delta delta-ok">Lightweighting Opportunity</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Projected Root Total Mass</div>
+              <div class="kpi-val" id="resRootMass">99.970 kg</div>
+              <div class="kpi-delta delta-ok">Base: 100.100 kg</div>
+            </div>
+            <div class="kpi-card">
+              <div class="kpi-label">Impact Risk Rating</div>
+              <div class="kpi-val" style="color: var(--accent-amber);">MEDIUM</div>
+              <div class="kpi-delta">Tooling & NVH Review</div>
+            </div>
+          </div>
+
+          <div style="margin-top: 1rem;">
+            <h4 style="color: var(--dassault-blue); margin-bottom: 0.5rem;">Upstream Traceability Breadcrumbs (Where-Used Path)</h4>
+            <div id="breadcrumbsList" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
+              <!-- Dynamic breadcrumbs -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: AI ENGINEERING COPILOT -->
+      <section id="view-copilot" class="view-panel">
+        <div class="view-header">
+          <h1>🤖 AI Engineering Copilot</h1>
+          <p>Live technical reasoning engine analyzing the 3DEXPERIENCE BOM with mandatory PLM ID citations.</p>
+        </div>
+
+        <div class="chat-layout">
+          <div class="chat-messages" id="chatArea">
+            <div class="chat-bubble bot">
+              👋 Hello! I am your <b>3DEXPERIENCE AI Engineering Copilot</b>.<br><br>
+              I analyze the complete Bill of Materials for <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> with guaranteed PLM ID traceability.<br><br>
+              <i>Click a suggested query or type a question below:</i>
+              <div class="quick-prompts">
+                <span class="prompt-chip" onclick="askCopilot('What parts use Aluminium?')">🔩 Parts using Aluminium</span>
+                <span class="prompt-chip" onclick="askCopilot('Show me the heaviest component.')">⚖️ Heaviest component</span>
+                <span class="prompt-chip" onclick="askCopilot('Are there any missing materials?')">🚨 Missing materials audit</span>
+                <span class="prompt-chip" onclick="askCopilot('What are the major subassemblies?')">🏗️ Major subassemblies</span>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <input type="text" id="chatInput" placeholder="Ask a technical question about the electric motor BOM..." onkeydown="if(event.key==='Enter') sendChat()" />
+            <button onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </section>
+
     </div>
   </div>
 
   <script>
-    // Offline Knowledge Base for Live Web Demo
-    const chatLauncher = document.getElementById("chatLauncher");
-    const chatWindow = document.getElementById("chatWindow");
-    const closeBtn = document.getElementById("closeBtn");
-    const chatBody = document.getElementById("chatBody");
-    const userInput = document.getElementById("userInput");
-    const sendBtn = document.getElementById("sendBtn");
+    // Component Master Dataset
+    const PRODUCTS = [
+      { name: "ECAR-EI_410KW_EDRIVE_FRONT", plm: "prd-12535825-00000047", rev: "D", mat: "IN_WORK", mass: 100.100, material: "Assembly", org: "ECAR_OEM" },
+      { name: "ECAR-EI_EMOTOR FRONT", plm: "prd-12535825-00000048", rev: "D", mat: "IN_WORK", mass: 39.730, material: "Assembly", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_HOUSING FRONT EDRIVE", plm: "prd-12535825-00000050", rev: "D", mat: "IN_WORK", mass: 30.520, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_REDUCER FRONT", plm: "prd-12535825-00000049", rev: "D", mat: "IN_WORK", mass: 29.850, material: "Assembly", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_FRONT HOUSING", plm: "prd-12535825-00000054", rev: "D", mat: "IN_WORK", mass: 12.180, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_REAR HOUSING", plm: "prd-12535825-00000055", rev: "D", mat: "IN_WORK", mass: 13.780, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_BEARING CARRIER", plm: "prd-12535825-00000056", rev: "D", mat: "IN_WORK", mass: 2.450, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_COVER FRONT", plm: "prd-12535825-00000057", rev: "D", mat: "IN_WORK", mass: 0.940, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_COVER REAR", plm: "prd-12535825-00000058", rev: "D", mat: "IN_WORK", mass: 1.170, material: "Aluminium", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_STATOR_STACK", plm: "prd-12535825-00000085", rev: "C", mat: "IN_WORK", mass: 14.200, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_ROTOR_ASSEMBLY", plm: "prd-12535825-00000086", rev: "C", mat: "IN_WORK", mass: 12.500, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_COPPER_WINDINGS", plm: "prd-12535825-00000087", rev: "B", mat: "IN_WORK", mass: 7.850, material: "Copper", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_MOTOR_SHAFT", plm: "prd-12535825-00000088", rev: "C", mat: "IN_WORK", mass: 3.650, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_PLANETARY_CARRIER", plm: "prd-12535825-00000060", rev: "D", mat: "IN_WORK", mass: 8.420, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_SUN_GEAR", plm: "prd-12535825-00000061", rev: "D", mat: "IN_WORK", mass: 3.120, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_RING_GEAR", plm: "prd-12535825-00000062", rev: "D", mat: "IN_WORK", mass: 7.200, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_DIFFERENTIAL", plm: "prd-12535825-00000063", rev: "D", mat: "IN_WORK", mass: 9.110, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-3D_HSH_BEA3", plm: "prd-12535825-00000081", rev: "B", mat: "IN_WORK", mass: 0.450, material: "Steel", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_SCREW_M6x20", plm: "prd-12535825-00000092", rev: "B", mat: "IN_WORK", mass: 0.012, material: "", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_WASHER_M6", plm: "prd-12535825-00000093", rev: "B", mat: "IN_WORK", mass: 0.003, material: "", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_O-RING_120x3", plm: "prd-12535825-00000104", rev: "A", mat: "IN_WORK", mass: 0.005, material: "", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_RETAINING_RING", plm: "prd-12535825-00000115", rev: "A", mat: "IN_WORK", mass: 0.008, material: "", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_SEAL_RING_45", plm: "prd-12535825-00000118", rev: "B", mat: "IN_WORK", mass: 0.015, material: "", org: "ECAR_SUPPLIER" },
+      { name: "ECAR-EI_GROUNDING_STRAP", plm: "prd-12535825-00000122", rev: "A", mat: "IN_WORK", mass: 0.025, material: "", org: "ECAR_SUPPLIER" }
+    ];
 
-    chatLauncher.addEventListener("click", () => chatWindow.classList.toggle("open"));
-    closeBtn.addEventListener("click", () => chatWindow.classList.remove("open"));
-
-    function appendMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = `msg msg-${sender}`;
-      msg.innerHTML = text;
-      chatBody.appendChild(msg);
-      chatBody.scrollTop = chatBody.scrollHeight;
+    // Navigation Switcher
+    function switchView(viewId, navElement) {
+      document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      navElement.classList.add('active');
     }
 
-    function runAgentQuery(query) {
-      const q = query.toLowerCase();
-
-      if (q.includes("aluminium") || q.includes("aluminum")) {
-        return `🔩 <b>Components utilizing Aluminium (10 parts identified):</b><br><br>` +
-          `• <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b> — Rev D, 30.520 kg<br>` +
-          `• <b>ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</b> — Rev D, 12.180 kg<br>` +
-          `• <b>ECAR-EI_REAR HOUSING (prd-12535825-00000055)</b> — Rev D, 13.780 kg<br>` +
-          `• <b>ECAR-EI_BEARING CARRIER (prd-12535825-00000056)</b> — Rev D, 2.450 kg<br>` +
-          `• <b>ECAR-EI_COVER FRONT (prd-12535825-00000057)</b> — Rev D, 0.940 kg<br>` +
-          `• <b>ECAR-EI_COVER REAR (prd-12535825-00000058)</b> — Rev D, 1.170 kg<br><br>` +
-          `<i>Sources: Verified against 3DEXPERIENCE material attribute 'Aluminium'.</i>`;
-      }
-
-      if (q.includes("heaviest") || q.includes("heavy") || q.includes("max weight")) {
-        return `⚖️ <b>Mass Analysis:</b><br><br>` +
-          `• <b>Top-Level Root Assembly:</b> <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> at <b>100.100 kg</b>.<br>` +
-          `• <b>Heaviest Subassembly:</b> <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b> at <b>39.730 kg</b> (39.7% of total assembly mass).<br>` +
-          `• <b>Heaviest Structural Part:</b> <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b> at <b>30.520 kg</b>.<br>` +
-          `• <b>Heaviest Leaf Component:</b> <b>ECAR-EI_STATOR_STACK (prd-12535825-00000085)</b> at <b>14.200 kg</b>.<br><br>` +
-          `<i>Sources: Certified CAD mass attributes extracted from PLM instance declarations.</i>`;
-      }
-
-      if (q.includes("missing") || q.includes("unassigned") || q.includes("risk")) {
-        return `⚠️ <b>Missing Material Audit (6 components identified):</b><br><br>` +
-          `The following components lack assigned material definitions, creating CAE stress simulation and regulatory compliance risks:<br>` +
-          `• <b>ECAR-EI_SCREW_M6x20 (prd-12535825-00000092)</b> — Rev B, 0.012 kg<br>` +
-          `• <b>ECAR-EI_WASHER_M6 (prd-12535825-00000093)</b> — Rev B, 0.003 kg<br>` +
-          `• <b>ECAR-EI_O-RING_120x3 (prd-12535825-00000104)</b> — Rev A, 0.005 kg<br>` +
-          `• <b>ECAR-EI_RETAINING_RING (prd-12535825-00000115)</b> — Rev A, 0.008 kg<br>` +
-          `• <b>ECAR-EI_SEAL_RING_45 (prd-12535825-00000118)</b> — Rev B, 0.015 kg<br>` +
-          `• <b>ECAR-EI_GROUNDING_STRAP (prd-12535825-00000122)</b> — Rev A, 0.025 kg<br><br>` +
-          `<i>Action: Flag for design release audit before engineering gate freeze.</i>`;
-      }
-
-      if (q.includes("subassembly") || q.includes("subassemblies") || q.includes("major")) {
-        return `🏗️ <b>Root Assembly Structure: ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> [100.100 kg]<br><br>` +
-          `The system decomposes into three primary subassemblies:<br>` +
-          `1. <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b> — 39.730 kg (39.7% mass share)<br>` +
-          `2. <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b> — 30.520 kg (30.5% mass share)<br>` +
-          `3. <b>ECAR-EI_REDUCER FRONT (prd-12535825-00000049)</b> — 29.850 kg (29.8% mass share)`;
-      }
-
-      return `That information is not available in the current PLM extraction.<br><br>` +
-        `💡 <i>I can analyze anything from the 3DEXPERIENCE BOM extraction. Try asking:</i><br>` +
-        `• "What parts use Aluminium?"<br>` +
-        `• "Show me the heaviest component."<br>` +
-        `• "Are there any missing materials?"<br>` +
-        `• "What are the major subassemblies?"`;
+    // Render Master Table
+    function renderTable(items) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      items.forEach(p => {
+        const matTag = p.material === "" 
+          ? '<span class="tag-missing">⚠️ Missing / Unassigned</span>' 
+          : `<span class="tag-ok">${p.material}</span>`;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><b>${p.name}</b></td>
+          <td><code>${p.plm}</code></td>
+          <td>${p.rev}</td>
+          <td>${p.mat}</td>
+          <td><b>${p.mass.toFixed(3)}</b></td>
+          <td>${matTag}</td>
+          <td>${p.org}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
 
-    function handleSend() {
-      const text = userInput.value.trim();
+    // Filter Slicer Logic
+    function filterData() {
+      const mat = document.getElementById("materialSlicer").value;
+      let filtered = PRODUCTS;
+      if (mat === "MISSING") {
+        filtered = filtered.filter(p => p.material === "");
+      } else if (mat !== "ALL") {
+        filtered = filtered.filter(p => p.material.toLowerCase().includes(mat.toLowerCase()));
+      }
+      renderTable(filtered);
+      const sumMass = filtered.reduce((acc, p) => acc + p.mass, 0);
+      document.getElementById("kpiMass").innerText = sumMass.toFixed(3) + " kg";
+      document.getElementById("kpiParts").innerText = filtered.length + " Parts";
+      const missCount = filtered.filter(p => p.material === "").length;
+      document.getElementById("kpiMissing").innerText = missCount + " Parts";
+    }
+
+    // Charts Initialization
+    let pieChart, barChart;
+    function initCharts() {
+      const ctxPie = document.getElementById('massPieChart').getContext('2d');
+      pieChart = new Chart(ctxPie, {
+        type: 'doughnut',
+        data: {
+          labels: ['E-Motor Front', 'Housing E-Drive', 'Reducer Front'],
+          datasets: [{
+            data: [39.730, 30.520, 29.850],
+            backgroundColor: ['#005686', '#06B6D4', '#64748B']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+
+      const ctxBar = document.getElementById('materialBarChart').getContext('2d');
+      barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: ['Steel', 'Aluminium', 'Copper', 'Missing Material'],
+          datasets: [{
+            label: 'Component Count',
+            data: [12, 10, 4, 6],
+            backgroundColor: ['#005686', '#38BDF8', '#F59E0B', '#EF4444']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    // BOM Expand/Collapse
+    function toggleTreeNode(header) {
+      const children = header.nextElementSibling;
+      if (children) {
+        children.classList.toggle('open');
+      }
+    }
+
+    // BOM Search
+    function searchBOM() {
+      const q = document.getElementById("bomSearch").value.toLowerCase().trim();
+      const nodes = document.querySelectorAll("#bomContainer .tree-node");
+      nodes.forEach(n => {
+        const text = n.innerText.toLowerCase();
+        if (!q) {
+          n.style.display = "block";
+        } else if (text.includes(q)) {
+          n.style.display = "block";
+          const ch = n.querySelector(".tree-children");
+          if (ch) ch.classList.add("open");
+        } else {
+          n.style.display = "none";
+        }
+      });
+    }
+
+    // Change Impact
+    function updateImpactInputs() {
+      const sel = document.getElementById("impactSelect");
+      const opt = sel.options[sel.selectedIndex];
+      const mass = parseFloat(opt.dataset.mass);
+      document.getElementById("curMass").value = mass.toFixed(3);
+      document.getElementById("propMass").value = (mass * 0.85).toFixed(3);
+    }
+
+    function runSimulation() {
+      const cur = parseFloat(document.getElementById("curMass").value);
+      const prop = parseFloat(document.getElementById("propMass").value);
+      const delta = prop - cur;
+      const newRoot = 100.100 + delta;
+
+      document.getElementById("resDelta").innerText = (delta >= 0 ? "+" : "") + delta.toFixed(3) + " kg";
+      document.getElementById("resRootMass").innerText = newRoot.toFixed(3) + " kg";
+
+      const sel = document.getElementById("impactSelect");
+      const opt = sel.options[sel.selectedIndex];
+      const name = opt.innerText;
+
+      const breadcrumbBox = document.getElementById("breadcrumbsList");
+      breadcrumbBox.innerHTML = `
+        <div><b>Level 0 (Target):</b> ${name}</div>
+        <div style="color: #64748B;">&nbsp;&nbsp;↳ via instance [inst_housing_mount]</div>
+        <div><b>Level 1 (Parent):</b> ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</div>
+        <div style="color: #64748B;">&nbsp;&nbsp;↳ via instance [inst_2]</div>
+        <div style="color: #005686; font-weight: bold;"><b>Level 2 (Root):</b> ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</div>
+      `;
+
+      document.getElementById("simResultsCard").style.display = "block";
+    }
+
+    // Copilot
+    function askCopilot(prompt) {
+      document.getElementById("chatInput").value = prompt;
+      sendChat();
+    }
+
+    function sendChat() {
+      const inp = document.getElementById("chatInput");
+      const text = inp.value.trim();
       if (!text) return;
-      appendMessage(text, "user");
-      userInput.value = "";
+
+      appendChatMessage(text, 'user');
+      inp.value = "";
 
       setTimeout(() => {
-        const response = runAgentQuery(text);
-        appendMessage(response, "bot");
-      }, 300);
+        let reply = "";
+        const q = text.toLowerCase();
+        if (q.includes("aluminium") || q.includes("aluminum")) {
+          reply = "🔩 <b>Components using Aluminium:</b><br><br>" +
+            "• <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b> — 30.520 kg<br>" +
+            "• <b>ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</b> — 12.180 kg<br>" +
+            "• <b>ECAR-EI_REAR HOUSING (prd-12535825-00000055)</b> — 13.780 kg<br>" +
+            "• <b>ECAR-EI_BEARING CARRIER (prd-12535825-00000056)</b> — 2.450 kg<br>" +
+            "• <b>ECAR-EI_COVER FRONT (prd-12535825-00000057)</b> — 0.940 kg<br>" +
+            "• <b>ECAR-EI_COVER REAR (prd-12535825-00000058)</b> — 1.170 kg<br><br>" +
+            "<i>Sources: Certified 3DEXPERIENCE material attributes.</i>";
+        } else if (q.includes("heaviest") || q.includes("heavy")) {
+          reply = "⚖️ <b>Mass Analysis:</b><br><br>" +
+            "• <b>Top-Level Assembly:</b> <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> at <b>100.100 kg</b>.<br>" +
+            "• <b>Heaviest Subassembly:</b> <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b> at <b>39.730 kg</b> (39.7% of total assembly).<br>" +
+            "• <b>Heaviest Leaf Component:</b> <b>ECAR-EI_STATOR_STACK (prd-12535825-00000085)</b> at <b>14.200 kg</b>.<br><br>" +
+            "<i>Sources: Certified CAD mass properties.</i>";
+        } else if (q.includes("missing") || q.includes("risk")) {
+          reply = "⚠️ <b>Missing Material Audit (6 Components Detected):</b><br><br>" +
+            "• <b>ECAR-EI_SCREW_M6x20 (prd-12535825-00000092)</b> — Rev B, 0.012 kg<br>" +
+            "• <b>ECAR-EI_WASHER_M6 (prd-12535825-00000093)</b> — Rev B, 0.003 kg<br>" +
+            "• <b>ECAR-EI_O-RING_120x3 (prd-12535825-00000104)</b> — Rev A, 0.005 kg<br>" +
+            "• <b>ECAR-EI_RETAINING_RING (prd-12535825-00000115)</b> — Rev A, 0.008 kg<br>" +
+            "• <b>ECAR-EI_SEAL_RING_45 (prd-12535825-00000118)</b> — Rev B, 0.015 kg<br>" +
+            "• <b>ECAR-EI_GROUNDING_STRAP (prd-12535825-00000122)</b> — Rev A, 0.025 kg<br><br>" +
+            "<i>Action: Design release freeze risk prior to CAE sign-off.</i>";
+        } else if (q.includes("subassemblies") || q.includes("subassembly") || q.includes("major")) {
+          reply = "🏗️ <b>Major Subassemblies of ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047):</b><br><br>" +
+            "1. <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b>: 39.730 kg (Electric Drive Machine)<br>" +
+            "2. <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b>: 30.520 kg (Cast Aluminium Structural Shell)<br>" +
+            "3. <b>ECAR-EI_REDUCER FRONT (prd-12535825-00000049)</b>: 29.850 kg (Planetary Gearbox & Differential)";
+        } else {
+          reply = "That information is not available in the current PLM extraction.<br><br>" +
+            "💡 <i>Try asking:</i><br>" +
+            "• 'What parts use Aluminium?'<br>" +
+            "• 'Show me the heaviest component.'<br>" +
+            "• 'Are there any missing materials?'<br>" +
+            "• 'What are the major subassemblies?'";
+        }
+        appendChatMessage(reply, 'bot');
+      }, 350);
     }
 
-    function sendPrompt(p) {
-      userInput.value = p;
-      handleSend();
+    function appendChatMessage(html, sender) {
+      const area = document.getElementById("chatArea");
+      const bubble = document.createElement("div");
+      bubble.className = `chat-bubble ${sender}`;
+      bubble.innerHTML = html;
+      area.appendChild(bubble);
+      area.scrollTop = area.scrollHeight;
     }
 
-    sendBtn.addEventListener("click", handleSend);
-    userInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") handleSend();
+    // Window Load
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTable(PRODUCTS);
+      initCharts();
+      updateImpactInputs();
     });
   </script>
 </body>
