@@ -540,128 +540,67 @@ with tab_impact:
 
 
 # ------------------------------------------
-# TAB 4: PLM AI ASSISTANT
+# TAB 4: REAL PLM AI ASSISTANT
 # ------------------------------------------
 with tab_chat:
-    st.markdown("### 🤖 PLM Engineering AI Assistant")
-    st.caption("Ask natural language questions about materials, mass, and components with traceable PLM source citations.")
+    st.markdown("### 🤖 PLM Engineering AI Assistant (Live LLM)")
+    st.caption("Ask natural language questions. Powered by real AI analyzing your live BOM data.")
 
-    # Simulated Agent Response Generation
-    def generate_agent_reply(user_query: str) -> str:
-        q = user_query.strip().lower()
+    # API Key Input
+    api_key = st.text_input("Enter your Gemini API Key:", type="password")
+    st.caption("Get a free API key at [aistudio.google.com](https://aistudio.google.com). Ensure you log in with your personal email address associated with your AI Pro account, not your ESILV school email.")
 
-        # Query 1: Aluminium / Aluminum
-        if "alumin" in q:
-            al_df = products_df[products_df["material"].str.contains("alumin", case=False, na=False)]
-            count = len(al_df)
-            parts_summary = []
-            citations = []
-            for _, r in al_df.iterrows():
-                parts_summary.append(f"- **{r['name']}** — `{r['material']}` ({r['mass']:.3f} kg)")
-                citations.append(f"{r['name']} ({r['plm_id']})")
+    if not api_key:
+        st.warning("⚠️ Please enter an API key to enable the AI.")
+    else:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
 
-            response = (
-                f"Found **{count} components** manufactured from **Aluminium** in the PLM dataset:\n\n"
-                + "\n".join(parts_summary)
-                + "\n\n"
-                + f"*Sources: {', '.join(citations)}*"
-            )
-            return response
+        # Convert the BOM dataframe into a readable string format for the LLM
+        context_data = products_df[['name', 'plm_id', 'revision', 'maturity', 'mass', 'material']].to_markdown()
 
-        # Query 2: Heaviest component
-        elif any(k in q for k in ["heaviest", "heavy", "maximum mass", "max mass", "highest mass", "weight"]):
-            sorted_df = products_df.sort_values(by="mass", ascending=False)
-            top_root = sorted_df.iloc[0]
-            # Heaviest sub-assembly/part
-            non_root_df = sorted_df[sorted_df["xml_id"] != "ID_0"]
-            heaviest_sub = non_root_df.iloc[0] if not non_root_df.empty else top_root
+        # Instruct the AI on how to behave and enforce the challenge requirement (citing sources)
+        system_instruction = f"""
+        You are an expert PLM AI Assistant helping an automotive engineer.
+        Here is the complete Bill of Materials (BOM) data for an electric motor:
+        {context_data}
 
-            response = (
-                f"⚖️ **Heaviest Component Analysis:**\n\n"
-                f"- **Top-Level Root Assembly:** **{top_root['name']}** with a mass of **{top_root['mass']:.3f} kg** "
-                f"(Revision `{top_root['revision']}`, Maturity `{top_root['maturity']}`).\n"
-                f"- **Heaviest Subassembly:** **{heaviest_sub['name']}** with a mass of **{heaviest_sub['mass']:.3f} kg** "
-                f"(Material: `{heaviest_sub['material'] or 'Unassigned'}`).\n\n"
-                f"*Sources: {top_root['name']} ({top_root['plm_id']}), {heaviest_sub['name']} ({heaviest_sub['plm_id']})*"
-            )
-            return response
+        Rules:
+        1. Answer the user's questions based ONLY on the data provided above.
+        2. You MUST explicitly cite the specific PLM ID (e.g., prd-12535825-...) for any component you mention to provide traceable evidence.
+        3. Be concise and professional.
+        """
 
-        # Query 3: Missing materials
-        elif any(k in q for k in ["missing material", "missing", "unassigned", "no material"]):
-            missing_df = products_df[products_df["material"] == ""]
-            count = len(missing_df)
-            items_summary = []
-            citations = []
-            for _, r in missing_df.iterrows():
-                items_summary.append(f"- **{r['name']}** (Revision `{r['revision']}`, Mass: `{r['mass']:.3f} kg`)")
-                citations.append(f"{r['name']} ({r['plm_id']})")
+        model = genai.GenerativeModel(
+            model_name="gemini-1.5-flash",
+            system_instruction=system_instruction
+        )
 
-            response = (
-                f"⚠️ **Missing Material Audit:**\n\n"
-                f"There are **{count} components** with missing or unassigned materials in the extracted BOM. "
-                f"These represent potential simulation and procurement risks:\n\n"
-                + "\n".join(items_summary)
-                + "\n\n"
-                + f"*Sources: {', '.join(citations)}*"
-            )
-            return response
+        if "real_chat_history" not in st.session_state:
+            st.session_state.real_chat_history = []
+            st.session_state.chat_session = model.start_chat(history=[])
 
-        # Fallback / Graceful handling
-        else:
-            return (
-                "I'm sorry, I can only answer questions about **Aluminium**, **heavy components**, "
-                "or **missing materials** right now.\n\n"
-                "💡 *Quick questions you can ask:*\n"
-                "- *'What parts use Aluminium?'*\n"
-                "- *'Show me the heaviest component.'*\n"
-                "- *'Are there any missing materials?'*"
-            )
+        # Render chat history
+        for msg in st.session_state.real_chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
 
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {
-                "role": "assistant",
-                "content": (
-                    "👋 Hello! I am your **PLM Intelligence Assistant**. "
-                    "Ask me questions about materials, mass drivers, or lifecycle compliance in this electric motor product structure.\n\n"
-                    "💡 *Examples:* \n"
-                    "- *'What parts use Aluminium?'*\n"
-                    "- *'Show me the heaviest component.'*\n"
-                    "- *'Are there any missing materials?'*"
-                )
-            }
-        ]
+        user_query = st.chat_input("Ask anything about the motor's materials, mass, or structure...")
 
-    # Quick prompt buttons
-    st.markdown("**Quick Prompts:**")
-    qcol1, qcol2, qcol3 = st.columns(3)
-    quick_query = None
-    with qcol1:
-        if st.button("🔩 What parts use Aluminium?", use_container_width=True):
-            quick_query = "What parts use Aluminium?"
-    with qcol2:
-        if st.button("⚖️ Show me the heaviest component", use_container_width=True):
-            quick_query = "Show me the heaviest component."
-    with qcol3:
-        if st.button("🚨 Are there any missing materials?", use_container_width=True):
-            quick_query = "Are there any missing materials?"
+        if user_query:
+            # Display User Message
+            st.session_state.real_chat_history.append({"role": "user", "content": user_query})
+            with st.chat_message("user"):
+                st.markdown(user_query)
 
-    # Display chat conversation
-    for msg in st.session_state.messages:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+            # Generate and Display AI Response
+            with st.spinner("AI is analyzing the PLM data..."):
+                try:
+                    response = st.session_state.chat_session.send_message(user_query)
+                    reply = response.text
+                except Exception as e:
+                    reply = f"Error connecting to AI: {e}"
 
-    # Handle input from text or quick button
-    user_prompt = st.chat_input("Ask a question about the electric motor BOM...")
-    effective_prompt = quick_query or user_prompt
-
-    if effective_prompt:
-        st.session_state.messages.append({"role": "user", "content": effective_prompt})
-        with st.chat_message("user"):
-            st.markdown(effective_prompt)
-
-        reply = generate_agent_reply(effective_prompt)
-        st.session_state.messages.append({"role": "assistant", "content": reply})
-        with st.chat_message("assistant"):
-            st.markdown(reply)
+            st.session_state.real_chat_history.append({"role": "assistant", "content": reply})
+            with st.chat_message("assistant"):
+                st.markdown(reply)
