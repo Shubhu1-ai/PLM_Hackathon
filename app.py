@@ -1,0 +1,667 @@
+"""
+PLM Product Intelligence Dashboard
+Front-End Application built with Streamlit.
+Module: app.py
+"""
+
+import streamlit as st
+import pandas as pd
+from typing import Dict, Any, Optional
+from plm_logic import get_engine, build_bom_tree, calculate_total_mass, get_where_used
+
+
+# ==========================================
+# 1. Page Configuration
+# ==========================================
+st.set_page_config(
+    page_title="PLM Product Intelligence",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Custom Styling for polished Hackathon UI
+st.markdown("""
+<style>
+    .main-header {
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #1E293B;
+        margin-bottom: 0.2rem;
+    }
+    .sub-header {
+        font-size: 1.05rem;
+        color: #64748B;
+        margin-bottom: 1.2rem;
+    }
+    .badge-in-work {
+        background-color: #FEF3C7;
+        color: #92400E;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        border: 1px solid #FDE68A;
+        display: inline-block;
+    }
+    .badge-released {
+        background-color: #D1FAE5;
+        color: #065F46;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        border: 1px solid #A7F3D0;
+        display: inline-block;
+    }
+    .badge-missing {
+        background-color: #FEE2E2;
+        color: #991B1B;
+        padding: 3px 10px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        border: 1px solid #FECACA;
+        display: inline-block;
+    }
+    .detail-card {
+        background: #F8FAFC;
+        border: 1px solid #E2E8F0;
+        border-radius: 10px;
+        padding: 1.2rem;
+        margin-bottom: 1.2rem;
+    }
+    .tree-leaf-box {
+        background: #FFFFFF;
+        border-left: 3px solid #3B82F6;
+        padding: 6px 12px;
+        margin: 4px 0;
+        border-radius: 4px;
+        font-size: 0.92rem;
+        border-top: 1px solid #F1F5F9;
+        border-right: 1px solid #F1F5F9;
+        border-bottom: 1px solid #F1F5F9;
+    }
+    .risk-card {
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border: 1px solid #E2E8F0;
+    }
+    .impact-path-box {
+        background-color: #F1F5F9;
+        border-left: 4px solid #0284C7;
+        padding: 8px 12px;
+        font-family: monospace;
+        margin: 6px 0;
+        border-radius: 4px;
+        font-size: 0.9rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ==========================================
+# 2. Data Initialization & Caching
+# ==========================================
+@st.cache_resource
+def load_engine():
+    """Initialize and cache the PLM engine."""
+    return get_engine()
+
+engine = load_engine()
+products_df = engine.db.get_products_df()
+instances_df = engine.db.get_instances_df()
+
+
+def count_tree_components(node: Dict[str, Any]) -> int:
+    """Recursively count all components (nodes) in the BOM."""
+    count = 1
+    for child in node.get("children", []):
+        count += count_tree_components(child)
+    return count
+
+
+# ==========================================
+# 3. Sidebar: Search & Filtering
+# ==========================================
+with st.sidebar:
+    st.image("https://img.icons8.com/color/96/engine.png", width=64)
+    st.title("PLM Intelligence")
+    st.caption("3DEXPERIENCE Data Extraction Navigator")
+    st.divider()
+
+    st.subheader("🔍 Component Search")
+    search_query = st.text_input(
+        "Search by Name or PLM ID:",
+        placeholder="e.g. BEA3 or prd-12535825-00000081",
+        help="Type part of a component name, PLM product ID, or XML ID"
+    ).strip()
+
+    product_options = ["None (Browse Full BOM)"] + [
+        f"{row['name']} ({row['plm_id']})" for _, row in products_df.iterrows()
+    ]
+    selected_option = st.selectbox(
+        "Or Select Component from Catalog:",
+        options=product_options,
+        index=0
+    )
+
+    # Determine active component target
+    active_target_id = None
+    if search_query:
+        matched = products_df[
+            products_df["plm_id"].str.contains(search_query, case=False, na=False) |
+            products_df["name"].str.contains(search_query, case=False, na=False) |
+            products_df["xml_id"].str.contains(search_query, case=False, na=False)
+        ]
+        if not matched.empty:
+            active_target_id = matched.iloc[0]["xml_id"]
+        else:
+            st.warning(f"No component matching '{search_query}'")
+    elif selected_option != "None (Browse Full BOM)":
+        plm_id_extracted = selected_option.split("(")[-1].replace(")", "").strip()
+        matched = products_df[products_df["plm_id"] == plm_id_extracted]
+        if not matched.empty:
+            active_target_id = matched.iloc[0]["xml_id"]
+
+    st.divider()
+    st.markdown("### 📊 Dataset Overview")
+    st.markdown(f"- **Unique Products**: `{len(products_df)}`")
+    st.markdown(f"- **BOM Instances**: `{len(instances_df)}`")
+    missing_mat_count = (products_df["material"] == "").sum()
+    st.markdown(f"- **Missing Materials**: `{missing_mat_count}` parts")
+    st.markdown(f"- **Maturity**: `IN_WORK` (100%)")
+
+
+# ==========================================
+# 4. Main Dashboard Header & Metrics
+# ==========================================
+st.markdown('<div class="main-header">⚡ PLM Product Intelligence Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Automotive Electric Motor Supplier Analysis · Powering E-Mobility</div>', unsafe_allow_html=True)
+
+bom_tree = build_bom_tree()
+top_mass_info = calculate_total_mass(bom_tree["xml_id"])
+total_components_in_tree = count_tree_components(bom_tree)
+
+# Top Metrics Row
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.metric(
+        label="Top Assembly Mass",
+        value=f"{top_mass_info['calculated_total_mass']:.2f} kg",
+        help="Recursively aggregated mass from calculate_total_mass()"
+    )
+with col2:
+    st.metric(
+        label="Total Tree Components",
+        value=total_components_in_tree,
+        help="Total nested component instances in BOM"
+    )
+with col3:
+    st.metric(
+        label="Unique Part Numbers",
+        value=len(products_df),
+        help="Unique product definitions in PLM extraction"
+    )
+with col4:
+    st.metric(
+        label="Root Assembly",
+        value=bom_tree["revision"],
+        delta=f"Rev {bom_tree['revision']} | {bom_tree['maturity']}",
+        delta_color="off",
+        help=f"PLM ID: {bom_tree['plm_id']}"
+    )
+
+st.divider()
+
+
+# ==========================================
+# 5. Component Details Section (If Searched)
+# ==========================================
+if active_target_id:
+    comp = engine._resolve_product_record(active_target_id)
+    if comp:
+        st.markdown(f"### 🔎 Component Inspector: `{comp['name']}`")
+        with st.container():
+            st.markdown('<div class="detail-card">', unsafe_allow_html=True)
+            dcol1, dcol2, dcol3, dcol4 = st.columns(4)
+
+            with dcol1:
+                st.markdown(f"**Component Name:**<br>`{comp['name']}`", unsafe_allow_html=True)
+                st.markdown(f"**PLM ID:**<br>`{comp['plm_id']}`", unsafe_allow_html=True)
+                st.markdown(f"**Internal XML ID:**<br>`{comp['xml_id']}`", unsafe_allow_html=True)
+
+            with dcol2:
+                st.markdown(f"**Revision:** `{comp['revision']}` (Index: `{comp['revision_index']}`)")
+                maturity_badge = (
+                    f'<span class="badge-released">RELEASED</span>'
+                    if comp['maturity'] == 'RELEASED'
+                    else f'<span class="badge-in-work">⚠️ {comp["maturity"]}</span>'
+                )
+                st.markdown(f"**Maturity State:**<br>{maturity_badge}", unsafe_allow_html=True)
+                st.markdown(f"**Lifecycle:** `{comp['lifecycle']}`")
+
+            with dcol3:
+                material_str = comp['material']
+                if material_str:
+                    st.markdown(f"**Material:**<br>`{material_str}`", unsafe_allow_html=True)
+                else:
+                    st.markdown(
+                        '**Material:**<br><span class="badge-missing">⚠️ NO MATERIAL ASSIGNED</span>',
+                        unsafe_allow_html=True
+                    )
+                st.markdown(f"**Mass (kg):** `{comp['mass']:.3f} kg`")
+
+            with dcol4:
+                st.markdown(f"**Owner / CAD Author:**<br>`{comp['owner']}`", unsafe_allow_html=True)
+                st.markdown(f"**Organization:**<br>`{comp['organization']}`", unsafe_allow_html=True)
+                st.markdown(f"**Project:**<br>`{comp['project']}`", unsafe_allow_html=True)
+
+            comp_mass_info = calculate_total_mass(comp['xml_id'])
+            if comp_mass_info['is_assembly']:
+                st.info(
+                    f"**Assembly Notice:** This is a subassembly containing "
+                    f"**{comp_mass_info['subcomponent_count']} direct child elements**. "
+                    f"Total recursive mass: **{comp_mass_info['calculated_total_mass']:.3f} kg**."
+                )
+
+            st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ==========================================
+# 6. Four Main Views: Tabs
+# ==========================================
+tab_bom, tab_risk, tab_impact, tab_chat = st.tabs([
+    "🌳 Product Explorer",
+    "⚠️ Risk Intelligence",
+    "🔄 Change Impact Analysis",
+    "🤖 PLM AI Assistant"
+])
+
+
+# ------------------------------------------
+# TAB 1: PRODUCT EXPLORER
+# ------------------------------------------
+with tab_bom:
+    st.markdown("### 🌳 Multi-Level Bill of Materials (BOM)")
+    st.caption("Expand assemblies to navigate the multi-level hierarchy, inspect mass, materials, and instances.")
+
+    def render_bom_node(node: Dict[str, Any], depth: int = 0, is_root: bool = False):
+        """
+        Recursively renders BOM tree using nested st.expander elements.
+        """
+        is_leaf = node.get("is_leaf", False)
+        children = node.get("children", [])
+        name = node.get("name", "Unknown")
+        plm_id = node.get("plm_id", "")
+        mass = node.get("mass", 0.0)
+        material = node.get("material", "") or "No Material"
+        revision = node.get("revision", "-")
+        inst_name = node.get("instance_name")
+
+        is_highlighted = (active_target_id is not None and node.get("xml_id") == active_target_id)
+        highlight_prefix = "⭐ " if is_highlighted else ""
+
+        if is_leaf:
+            st.markdown(
+                f"""
+                <div class="tree-leaf-box" style="margin-left: {depth * 18}px; {'border-left: 4px solid #F59E0B; background: #FFFBEB;' if is_highlighted else ''}">
+                    {highlight_prefix}<b>🔩 [{inst_name or 'Part'}]</b> {name} 
+                    <span style="color: #64748B;">({plm_id})</span> &nbsp;|&nbsp; 
+                    <b>Mass:</b> <code>{mass:.3f} kg</code> &nbsp;|&nbsp; 
+                    <b>Material:</b> <code>{material}</code> &nbsp;|&nbsp; 
+                    <b>Rev:</b> <code>{revision}</code>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            expander_label = (
+                f"{highlight_prefix}📦 [{inst_name or 'Assembly'}] {name} ({plm_id}) "
+                f"· {mass:.3f} kg · {len(children)} sub-items"
+            )
+            default_expanded = is_root or is_highlighted or (depth < 1)
+
+            with st.expander(expander_label, expanded=default_expanded):
+                hcol1, hcol2, hcol3 = st.columns([2, 1, 1])
+                with hcol1:
+                    st.caption(f"**Name:** {name} | **Rev:** {revision} | **Maturity:** {node.get('maturity')}")
+                with hcol2:
+                    st.caption(f"**Declared Mass:** {mass:.3f} kg")
+                with hcol3:
+                    st.caption(f"**Child Branches:** {len(children)}")
+
+                for child in children:
+                    render_bom_node(child, depth=depth + 1, is_root=False)
+
+    render_bom_node(bom_tree, depth=0, is_root=True)
+
+
+# ------------------------------------------
+# TAB 2: RISK INTELLIGENCE
+# ------------------------------------------
+with tab_risk:
+    st.markdown("### ⚠️ Engineering & Supply Chain Risk Intelligence")
+    st.caption("Automated audit of BOM compliance, lifecycle readiness, and material assignments.")
+
+    missing_materials_df = products_df[products_df["material"] == ""].copy()
+    unreleased_df = products_df[products_df["maturity"] != "RELEASED"].copy()
+
+    rcol1, rcol2 = st.columns(2)
+    with rcol1:
+        st.markdown("""
+        <div class="risk-card" style="background-color: #FEF2F2; border-color: #F87171;">
+            <h4 style="color: #991B1B; margin-top: 0;">🚨 Missing Material Risk</h4>
+            <p style="color: #7F1D1D; font-size: 0.92rem;">
+                Components with undefined materials cannot undergo accurate CAE stress simulation, 
+                environmental compliance audits (REACH / RoHS), or precise raw material cost rollups.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.metric(
+            label="Missing Material Components",
+            value=f"{len(missing_materials_df)} / {len(products_df)}",
+            delta=f"{(len(missing_materials_df)/len(products_df))*100:.1f}% Unassigned",
+            delta_color="inverse"
+        )
+
+    with rcol2:
+        st.markdown("""
+        <div class="risk-card" style="background-color: #FFFBEB; border-color: #FBBF24;">
+            <h4 style="color: #92400E; margin-top: 0;">⚠️ Lifecycle Maturity Risk</h4>
+            <p style="color: #78350F; font-size: 0.92rem;">
+                Supplier risk warning: All components are currently in <b>IN_WORK</b> maturity. 
+                Zero components have reached the verified <b>RELEASED</b> state, indicating ongoing design freeze volatility.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.metric(
+            label="Unreleased BOM Components",
+            value=f"{len(unreleased_df)} / {len(products_df)}",
+            delta="100% Unreleased (IN_WORK)",
+            delta_color="inverse"
+        )
+
+    st.subheader(f"📋 Missing Materials Audit ({len(missing_materials_df)} Items)")
+    st.markdown("These components require immediate material definition by the engineering or supplier team:")
+
+    display_missing = missing_materials_df[[
+        "plm_id", "name", "revision", "maturity", "mass", "owner", "project"
+    ]].rename(columns={
+        "plm_id": "PLM ID",
+        "name": "Component Name",
+        "revision": "Rev",
+        "maturity": "Maturity",
+        "mass": "Mass (kg)",
+        "owner": "Author",
+        "project": "Project"
+    })
+    st.dataframe(display_missing, use_container_width=True, hide_index=True)
+
+    st.divider()
+
+    # Heaviest Components Analysis (Mass Pareto)
+    st.subheader("⚖️ Heaviest Components (Top Mass Drivers)")
+    st.caption("Top 10 individual components and subassemblies driving product weight:")
+    top_heavy = products_df.sort_values(by="mass", ascending=False).head(10)[[
+        "plm_id", "name", "revision", "mass", "material"
+    ]].rename(columns={
+        "plm_id": "PLM ID",
+        "name": "Component Name",
+        "revision": "Rev",
+        "mass": "Mass (kg)",
+        "material": "Material Assigned"
+    })
+    st.dataframe(top_heavy, use_container_width=True, hide_index=True)
+
+
+# ------------------------------------------
+# TAB 3: CHANGE IMPACT ANALYSIS
+# ------------------------------------------
+with tab_impact:
+    st.markdown("### 🔄 Component Change Impact Analysis")
+    st.caption("Simulate component redesigns, mass alterations, or material swaps with multi-level 'Where-Used' propagation.")
+
+    select_items = [
+        (row["xml_id"], f"{row['name']} ({row['plm_id']}) — {row['mass']:.3f} kg")
+        for _, row in products_df.iterrows()
+    ]
+    
+    col_sel, _ = st.columns([2, 1])
+    with col_sel:
+        impact_component_xml_id = st.selectbox(
+            "Select Component to Modify / Replace:",
+            options=[x[0] for x in select_items],
+            format_func=lambda x: next(item[1] for item in select_items if item[0] == x),
+            index=2
+        )
+
+    selected_comp = engine._resolve_product_record(impact_component_xml_id)
+    current_mass = float(selected_comp["mass"])
+
+    # Simulation Inputs
+    st.markdown("#### 🧪 Simulation Parameters")
+    sim_col1, sim_col2, sim_col3 = st.columns(3)
+    with sim_col1:
+        st.number_input(
+            "Current Mass (kg):",
+            value=current_mass,
+            disabled=True,
+            format="%.4f"
+        )
+    with sim_col2:
+        proposed_mass = st.number_input(
+            "Proposed New Mass (kg):",
+            value=round(current_mass * 1.15, 4) if current_mass > 0 else 0.5000,
+            step=0.0100,
+            format="%.4f",
+            help="Simulate replacing this part with a lighter or heavier alternative"
+        )
+    with sim_col3:
+        proposed_material = st.text_input(
+            "Proposed New Material (Optional):",
+            value="Carbon Composite / Light Alloy" if not selected_comp["material"] else f"{selected_comp['material']} (Optimized)",
+            help="Indicate replacement material"
+        )
+
+    simulate_btn = st.button("🚀 Simulate Impact", type="primary", use_container_width=True)
+
+    if simulate_btn:
+        with st.spinner("Executing bottom-up where-used traversal..."):
+            where_used_list = get_where_used(impact_component_xml_id)
+            root_mass_before = top_mass_info["calculated_total_mass"]
+            delta = proposed_mass - current_mass
+            root_mass_after = root_mass_before + delta
+
+        st.divider()
+        st.markdown(f"### 📈 Impact Simulation Results for `{selected_comp['name']}`")
+
+        affected_count = len(where_used_list)
+        if affected_count > 0:
+            st.warning(
+                f"⚠️ **High Impact Detected:** Modifying this component affects **{affected_count} parent assemblies** "
+                f"up to the top-level e-drive root."
+            )
+        else:
+            st.info("ℹ️ This component is the top-level assembly; no higher parents are affected.")
+
+        mcol1, mcol2, mcol3, mcol4 = st.columns(4)
+        with mcol1:
+            st.metric("Current Part Mass", f"{current_mass:.4f} kg")
+        with mcol2:
+            st.metric("Proposed Part Mass", f"{proposed_mass:.4f} kg")
+        with mcol3:
+            st.metric(
+                "Mass Delta (Δ)",
+                f"{delta:+.4f} kg",
+                delta=f"{delta:+.4f} kg",
+                delta_color="inverse"
+            )
+        with mcol4:
+            st.metric(
+                "Projected Root E-Drive Mass",
+                f"{root_mass_after:.4f} kg",
+                delta=f"{delta:+.4f} kg",
+                delta_color="inverse"
+            )
+
+        st.success(
+            f"🎯 **System Weight Conclusion:** If this part is swapped, the total weight of the root assembly "
+            f"will change by **{delta:+.4f} kg** (from **{root_mass_before:.4f} kg** to **{root_mass_after:.4f} kg**)."
+        )
+
+        if where_used_list:
+            st.markdown("#### 🗺️ Upward Impact Paths (Breadcrumbs to Root):")
+            for item in where_used_list:
+                st.markdown(
+                    f"""
+                    <div class="impact-path-box">
+                        <b>[Level {item['level']}]</b> <b>{item['parent_name']}</b> <code>({item['parent_plm_id']})</code><br>
+                        <span style="color: #475569;">Path:</span> <code>{item['impact_path']}</code><br>
+                        <span style="color: #64748B; font-size: 0.82rem;">Via Instance: <b>{item['via_instance_name']}</b> | Maturity: {item['parent_maturity']} | Parent Mass: {item['parent_mass']:.3f} kg</span>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+            st.markdown("#### 📊 Affected Parent Assemblies Details")
+            affected_df = pd.DataFrame(where_used_list)[[
+                "level", "parent_name", "parent_plm_id", "via_instance_name", "parent_mass", "parent_maturity"
+            ]].rename(columns={
+                "level": "Level",
+                "parent_name": "Parent Assembly",
+                "parent_plm_id": "Parent PLM ID",
+                "via_instance_name": "Instance Connection",
+                "parent_mass": "Parent Mass (kg)",
+                "parent_maturity": "Parent Maturity"
+            })
+            st.dataframe(affected_df, use_container_width=True, hide_index=True)
+
+
+# ------------------------------------------
+# TAB 4: PLM AI ASSISTANT
+# ------------------------------------------
+with tab_chat:
+    st.markdown("### 🤖 PLM Engineering AI Assistant")
+    st.caption("Ask natural language questions about materials, mass, and components with traceable PLM source citations.")
+
+    # Simulated Agent Response Generation
+    def generate_agent_reply(user_query: str) -> str:
+        q = user_query.strip().lower()
+
+        # Query 1: Aluminium / Aluminum
+        if "alumin" in q:
+            al_df = products_df[products_df["material"].str.contains("alumin", case=False, na=False)]
+            count = len(al_df)
+            parts_summary = []
+            citations = []
+            for _, r in al_df.iterrows():
+                parts_summary.append(f"- **{r['name']}** — `{r['material']}` ({r['mass']:.3f} kg)")
+                citations.append(f"{r['name']} ({r['plm_id']})")
+
+            response = (
+                f"Found **{count} components** manufactured from **Aluminium** in the PLM dataset:\n\n"
+                + "\n".join(parts_summary)
+                + "\n\n"
+                + f"*Sources: {', '.join(citations)}*"
+            )
+            return response
+
+        # Query 2: Heaviest component
+        elif any(k in q for k in ["heaviest", "heavy", "maximum mass", "max mass", "highest mass", "weight"]):
+            sorted_df = products_df.sort_values(by="mass", ascending=False)
+            top_root = sorted_df.iloc[0]
+            # Heaviest sub-assembly/part
+            non_root_df = sorted_df[sorted_df["xml_id"] != "ID_0"]
+            heaviest_sub = non_root_df.iloc[0] if not non_root_df.empty else top_root
+
+            response = (
+                f"⚖️ **Heaviest Component Analysis:**\n\n"
+                f"- **Top-Level Root Assembly:** **{top_root['name']}** with a mass of **{top_root['mass']:.3f} kg** "
+                f"(Revision `{top_root['revision']}`, Maturity `{top_root['maturity']}`).\n"
+                f"- **Heaviest Subassembly:** **{heaviest_sub['name']}** with a mass of **{heaviest_sub['mass']:.3f} kg** "
+                f"(Material: `{heaviest_sub['material'] or 'Unassigned'}`).\n\n"
+                f"*Sources: {top_root['name']} ({top_root['plm_id']}), {heaviest_sub['name']} ({heaviest_sub['plm_id']})*"
+            )
+            return response
+
+        # Query 3: Missing materials
+        elif any(k in q for k in ["missing material", "missing", "unassigned", "no material"]):
+            missing_df = products_df[products_df["material"] == ""]
+            count = len(missing_df)
+            items_summary = []
+            citations = []
+            for _, r in missing_df.iterrows():
+                items_summary.append(f"- **{r['name']}** (Revision `{r['revision']}`, Mass: `{r['mass']:.3f} kg`)")
+                citations.append(f"{r['name']} ({r['plm_id']})")
+
+            response = (
+                f"⚠️ **Missing Material Audit:**\n\n"
+                f"There are **{count} components** with missing or unassigned materials in the extracted BOM. "
+                f"These represent potential simulation and procurement risks:\n\n"
+                + "\n".join(items_summary)
+                + "\n\n"
+                + f"*Sources: {', '.join(citations)}*"
+            )
+            return response
+
+        # Fallback / Graceful handling
+        else:
+            return (
+                "I'm sorry, I can only answer questions about **Aluminium**, **heavy components**, "
+                "or **missing materials** right now.\n\n"
+                "💡 *Quick questions you can ask:*\n"
+                "- *'What parts use Aluminium?'*\n"
+                "- *'Show me the heaviest component.'*\n"
+                "- *'Are there any missing materials?'*"
+            )
+
+    # Initialize chat history
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {
+                "role": "assistant",
+                "content": (
+                    "👋 Hello! I am your **PLM Intelligence Assistant**. "
+                    "Ask me questions about materials, mass drivers, or lifecycle compliance in this electric motor product structure.\n\n"
+                    "💡 *Examples:* \n"
+                    "- *'What parts use Aluminium?'*\n"
+                    "- *'Show me the heaviest component.'*\n"
+                    "- *'Are there any missing materials?'*"
+                )
+            }
+        ]
+
+    # Quick prompt buttons
+    st.markdown("**Quick Prompts:**")
+    qcol1, qcol2, qcol3 = st.columns(3)
+    quick_query = None
+    with qcol1:
+        if st.button("🔩 What parts use Aluminium?", use_container_width=True):
+            quick_query = "What parts use Aluminium?"
+    with qcol2:
+        if st.button("⚖️ Show me the heaviest component", use_container_width=True):
+            quick_query = "Show me the heaviest component."
+    with qcol3:
+        if st.button("🚨 Are there any missing materials?", use_container_width=True):
+            quick_query = "Are there any missing materials?"
+
+    # Display chat conversation
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Handle input from text or quick button
+    user_prompt = st.chat_input("Ask a question about the electric motor BOM...")
+    effective_prompt = quick_query or user_prompt
+
+    if effective_prompt:
+        st.session_state.messages.append({"role": "user", "content": effective_prompt})
+        with st.chat_message("user"):
+            st.markdown(effective_prompt)
+
+        reply = generate_agent_reply(effective_prompt)
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        with st.chat_message("assistant"):
+            st.markdown(reply)
