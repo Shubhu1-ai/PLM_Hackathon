@@ -617,8 +617,13 @@ elif app_view == "🌳 Product Structure (BOM)":
     components.html(generate_catia_3d_viewer(), height=520, scrolling=False)
 
     # 5.2 CAD Studio Render Card (if generated image exists)
-    cad_image_path = "d:/PLM/assets/ecar_edrive_cad_render.png"
-    if os.path.exists(cad_image_path):
+    cad_candidates = [
+        os.path.join(os.path.dirname(__file__), "assets", "ecar_edrive_cad_render.png"),
+        os.path.join("assets", "ecar_edrive_cad_render.png"),
+        "d:/PLM/assets/ecar_edrive_cad_render.png"
+    ]
+    cad_image_path = next((p for p in cad_candidates if os.path.exists(p)), None)
+    if cad_image_path:
         with st.expander("🖼️ View High-Resolution CATIA Studio CAD Render (KeyShot Lighting)", expanded=False):
             st.image(cad_image_path, caption="CATIA 3D CAD Engineering Cutaway — ECAR-EI_410KW_EDRIVE_FRONT (100.100 kg)", use_container_width=True)
 
