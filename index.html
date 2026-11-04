@@ -3,17 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PLM Intelligence | 3DEXPERIENCE Engineering Cockpit</title>
+  <title>3DEXPERIENCE | Dassault Systèmes PLM Intelligence Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
   <style>
     :root {
-      --dassault-blue: #005686;
-      --dassault-dark: #003B5C;
-      --dassault-light: #EBF4F9;
-      --bg-gray: #F8FAFC;
+      --ds-blue: #005686;
+      --ds-hover: #0072B2;
+      --ds-dark: #003B5C;
+      --ds-light: #EBF4F9;
+      --bg-gray: #F4F6F9;
       --card-bg: #FFFFFF;
       --border-color: #E2E8F0;
       --text-main: #0F172A;
@@ -27,7 +30,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     body {
@@ -38,9 +41,129 @@
       overflow: hidden;
     }
 
-    /* 3DEXPERIENCE Sidebar */
+    /* 3DS Dassault Systèmes Top Brand Header */
+    .ds-brand-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 58px;
+      background: #FFFFFF;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 200;
+      box-shadow: 0 1px 4px rgba(0, 86, 134, 0.05);
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .compass-logo-svg {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+    }
+    .ds-brand-titles {
+      display: flex;
+      flex-direction: column;
+    }
+    .ds-brand-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--ds-blue);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+    .ds-brand-sub {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ds-hover);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-center-search {
+      flex: 1;
+      max-width: 520px;
+      margin: 0 2rem;
+      position: relative;
+    }
+    .brand-center-search input {
+      width: 100%;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      border-radius: 20px;
+      padding: 7px 16px 7px 38px;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .brand-center-search input:focus {
+      border-color: var(--ds-blue);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(0, 86, 134, 0.1);
+    }
+    .search-icon-pos {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .brand-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .platform-badge {
+      background: var(--ds-light);
+      color: var(--ds-blue);
+      border: 1px solid #BFDBFE;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .btn-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-github:hover {
+      background: #F1F5F9;
+      border-color: #CBD5E1;
+    }
+
+    /* Layout below header */
+    .app-body {
+      display: flex;
+      width: 100%;
+      height: calc(100vh - 58px);
+      margin-top: 58px;
+      overflow: hidden;
+    }
+
+    /* Sidebar - Compass Apps */
     .sidebar {
-      width: 270px;
+      width: 280px;
       background: #FFFFFF;
       border-right: 1px solid var(--border-color);
       display: flex;
@@ -49,51 +172,21 @@
       z-index: 100;
     }
 
-    .compass-brand {
-      padding: 1.25rem 1.25rem 1rem;
+    .sidebar-header {
+      padding: 1.25rem 1.25rem 0.75rem;
       border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 12px;
     }
-    .compass-logo {
-      width: 42px;
-      height: 42px;
-      background: var(--dassault-blue);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      color: #fff;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0, 86, 134, 0.2);
-    }
-    .brand-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--dassault-blue);
-      line-height: 1.2;
-    }
-    .brand-subtitle {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .nav-section-title {
-      padding: 1.25rem 1.25rem 0.5rem;
+    .sidebar-header-title {
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       color: var(--text-muted);
     }
 
     .nav-list {
       list-style: none;
-      padding: 0 0.75rem;
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -102,7 +195,7 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
+      padding: 11px 14px;
       border-radius: 8px;
       font-size: 0.92rem;
       font-weight: 500;
@@ -111,26 +204,25 @@
       transition: all 0.15s ease;
     }
     .nav-item:hover {
-      background: var(--dassault-light);
-      color: var(--dassault-blue);
+      background: var(--ds-light);
+      color: var(--ds-blue);
     }
     .nav-item.active {
-      background: var(--dassault-light);
-      color: var(--dassault-blue);
+      background: var(--ds-light);
+      color: var(--ds-blue);
       font-weight: 700;
-      border-left: 4px solid var(--dassault-blue);
+      border-left: 4px solid var(--ds-blue);
     }
     .nav-icon {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
     }
 
     .sidebar-footer {
       margin-top: auto;
       padding: 1.25rem;
       border-top: 1px solid var(--border-color);
-      font-size: 0.8rem;
-      color: var(--text-muted);
       background: #FAFAFA;
+      font-size: 0.8rem;
     }
     .status-badge {
       display: inline-flex;
@@ -151,69 +243,12 @@
       background: var(--accent-green);
     }
 
-    /* Main Content Area */
-    .main-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: var(--bg-gray);
-    }
-
-    /* Top Application Bar */
-    .topbar {
-      height: 64px;
-      background: #FFFFFF;
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 2rem;
-      flex-shrink: 0;
-    }
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .system-pill {
-      background: var(--dassault-light);
-      color: var(--dassault-blue);
-      border: 1px solid #BFDBFE;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 0.82rem;
-      font-weight: 600;
-    }
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .btn-repo {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
-      background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      color: var(--text-main);
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .btn-repo:hover {
-      background: #F1F5F9;
-      border-color: #CBD5E1;
-    }
-
-    /* View Content Scrollable */
+    /* Content Area */
     .content-area {
       flex: 1;
       overflow-y: auto;
       padding: 2rem;
+      background: var(--bg-gray);
     }
 
     .view-panel {
@@ -232,9 +267,9 @@
       margin-bottom: 1.5rem;
     }
     .view-header h1 {
-      font-size: 1.75rem;
+      font-size: 1.85rem;
       font-weight: 800;
-      color: var(--dassault-blue);
+      color: var(--ds-blue);
       letter-spacing: -0.02em;
     }
     .view-header p {
@@ -243,7 +278,6 @@
       margin-top: 4px;
     }
 
-    /* Widget Card */
     .widget-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -255,14 +289,14 @@
     .widget-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: var(--dassault-blue);
+      color: var(--ds-blue);
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    /* KPI Metrics Grid */
+    /* KPI Grid */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -287,7 +321,7 @@
     .kpi-val {
       font-size: 1.85rem;
       font-weight: 800;
-      color: var(--dassault-blue);
+      color: var(--ds-blue);
       line-height: 1.1;
     }
     .kpi-delta {
@@ -298,18 +332,16 @@
     .delta-risk { color: var(--accent-red); font-weight: 600; }
     .delta-ok { color: var(--accent-green); font-weight: 600; }
 
-    /* Slicers Row */
+    /* Slicers */
     .slicers-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
-      margin-bottom: 1rem;
     }
     .slicer-group label {
       display: block;
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-main);
       margin-bottom: 6px;
     }
     .slicer-group select {
@@ -322,10 +354,10 @@
       background: #FFFFFF;
     }
     .slicer-group select:focus {
-      border-color: var(--dassault-blue);
+      border-color: var(--ds-blue);
     }
 
-    /* Charts Grid */
+    /* Charts */
     .charts-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -337,6 +369,74 @@
       height: 320px;
     }
 
+    /* 3D CATIA Viewport Box */
+    .catia-3d-box {
+      background: #0F172A;
+      border: 1px solid #1E293B;
+      border-radius: 12px;
+      position: relative;
+      height: 520px;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+    }
+    #three-viewport {
+      width: 100%;
+      height: 100%;
+    }
+    .catia-hud {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      color: #F8FAFC;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      font-size: 13px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .catia-hud b { color: #38BDF8; }
+    .catia-toolbar {
+      position: absolute;
+      bottom: 14px;
+      left: 18px;
+      right: 18px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(8px);
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #E2E8F0;
+      font-size: 13px;
+      z-index: 10;
+    }
+    .catia-toolbar input[type=range] {
+      width: 140px;
+      accent-color: var(--ds-blue);
+      cursor: pointer;
+    }
+    .btn-3d {
+      background: #1E293B;
+      border: 1px solid #475569;
+      color: #F8FAFC;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-3d:hover {
+      background: var(--ds-blue);
+      border-color: var(--ds-hover);
+    }
+
     /* Tables */
     .table-container {
       overflow-x: auto;
@@ -346,7 +446,6 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.88rem;
-      text-align: left;
     }
     th {
       background: #F1F5F9;
@@ -360,7 +459,6 @@
     td {
       padding: 10px 14px;
       border-bottom: 1px solid #F1F5F9;
-      color: #1E293B;
     }
     tr:hover td {
       background: #F8FAFC;
@@ -382,7 +480,7 @@
       font-size: 0.75rem;
     }
 
-    /* Tree View */
+    /* BOM Tree */
     .tree-node {
       border: 1px solid var(--border-color);
       border-radius: 8px;
@@ -396,7 +494,6 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      user-select: none;
       background: #FFFFFF;
       transition: background 0.15s;
     }
@@ -406,9 +503,6 @@
     .tree-title {
       font-weight: 600;
       font-size: 0.92rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     .tree-meta {
       font-size: 0.82rem;
@@ -424,19 +518,13 @@
       display: block;
     }
 
-    /* Change Impact Form */
+    /* Impact Simulation Form */
     .impact-form-grid {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr;
       gap: 1.25rem;
       align-items: flex-end;
       margin-bottom: 1.5rem;
-    }
-    .impact-form-grid label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
     }
     .impact-form-grid select,
     .impact-form-grid input {
@@ -448,19 +536,19 @@
       outline: none;
     }
     .btn-run {
-      background: var(--dassault-blue);
+      background: var(--ds-blue);
       color: #FFFFFF;
       border: none;
-      padding: 11px 20px;
+      padding: 12px 20px;
       border-radius: 8px;
       font-weight: 700;
       cursor: pointer;
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       transition: background 0.15s;
       width: 100%;
     }
     .btn-run:hover {
-      background: var(--dassault-dark);
+      background: var(--ds-dark);
     }
 
     /* Copilot Chat */
@@ -483,7 +571,7 @@
       background: #F8FAFC;
     }
     .chat-bubble {
-      max-width: 80%;
+      max-width: 82%;
       padding: 12px 16px;
       border-radius: 10px;
       font-size: 0.9rem;
@@ -496,7 +584,7 @@
       border-bottom-left-radius: 2px;
     }
     .chat-bubble.user {
-      background: var(--dassault-blue);
+      background: var(--ds-blue);
       color: #FFFFFF;
       align-self: flex-end;
       border-bottom-right-radius: 2px;
@@ -516,33 +604,26 @@
       font-size: 0.9rem;
       outline: none;
     }
-    .chat-input-bar input:focus {
-      border-color: var(--dassault-blue);
-    }
     .chat-input-bar button {
-      background: var(--dassault-blue);
+      background: var(--ds-blue);
       color: white;
       border: none;
-      padding: 0 18px;
+      padding: 0 20px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
     }
-    .quick-prompts {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
     .prompt-chip {
-      background: #EBF4F9;
-      color: var(--dassault-blue);
+      background: var(--ds-light);
+      color: var(--ds-blue);
       border: 1px solid #BFDBFE;
       padding: 4px 10px;
       border-radius: 16px;
       font-size: 0.78rem;
       cursor: pointer;
       font-weight: 500;
+      display: inline-block;
+      margin: 4px 4px 0 0;
     }
     .prompt-chip:hover {
       background: #DBEAFE;
@@ -551,83 +632,103 @@
 </head>
 <body>
 
-  <!-- 3DEXPERIENCE Sidebar Navigation -->
-  <aside class="sidebar">
-    <div class="compass-brand">
-      <div class="compass-logo">🧭</div>
-      <div>
-        <div class="brand-title">3DEXPERIENCE</div>
-        <div class="brand-subtitle">PLM Intelligence Platform</div>
+  <!-- Top 3DS Dassault Systèmes Brand Bar -->
+  <header class="ds-brand-bar">
+    <a href="#" class="brand-left">
+      <svg class="compass-logo-svg" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="compassGradWeb" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0072B2"/>
+            <stop offset="100%" stop-color="#003B5C"/>
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="46" fill="url(#compassGradWeb)" stroke="#005686" stroke-width="2"/>
+        <polygon points="50,12 55,28 45,28" fill="#FFFFFF"/>
+        <polygon points="88,50 72,55 72,45" fill="#FFFFFF"/>
+        <polygon points="50,88 55,72 45,72" fill="#FFFFFF"/>
+        <polygon points="12,50 28,55 28,45" fill="#FFFFFF"/>
+        <circle cx="50" cy="50" r="14" fill="#FFFFFF"/>
+        <circle cx="50" cy="50" r="10" fill="#005686"/>
+      </svg>
+      <div class="ds-brand-titles">
+        <div class="ds-brand-title">3DS <span style="font-weight:600; color:#334155; font-size:1rem;">DASSAULT SYSTÈMES</span></div>
+        <div class="ds-brand-sub">3DEXPERIENCE® Platform</div>
       </div>
+    </a>
+
+    <div class="brand-center-search">
+      <span class="search-icon-pos">🔍</span>
+      <input type="text" placeholder="Search 3DEXPERIENCE Platform for CAD parts, assemblies, or materials..." />
     </div>
 
-    <div class="nav-section-title">Compass Applications</div>
-    <ul class="nav-list">
-      <li class="nav-item active" onclick="switchView('view-dash', this)">
-        <span class="nav-icon">📊</span>
-        <span>Dashboard & Analytics</span>
-      </li>
-      <li class="nav-item" onclick="switchView('view-bom', this)">
-        <span class="nav-icon">🌳</span>
-        <span>Product Structure (BOM)</span>
-      </li>
-      <li class="nav-item" onclick="switchView('view-impact', this)">
-        <span class="nav-icon">🔄</span>
-        <span>Change Impact Analysis</span>
-      </li>
-      <li class="nav-item" onclick="switchView('view-copilot', this)">
-        <span class="nav-icon">🤖</span>
-        <span>AI Engineering Copilot</span>
-      </li>
-    </ul>
-
-    <div class="sidebar-footer">
-      <div style="font-weight: 700; color: var(--dassault-blue); margin-bottom: 2px;">410 kW Electric Drive</div>
-      <div>Assembly: <code>ECAR-EI_FRONT</code></div>
-      <div>Ref Mass: <b>100.100 kg</b></div>
-      <div class="status-badge"><span class="status-dot"></span> 3DEXPERIENCE Connected</div>
+    <div class="brand-right">
+      <span class="platform-badge">⚡ ECAR-EI_410KW_EDRIVE_FRONT</span>
+      <span class="platform-badge" style="background:#ECFDF5; color:#065F46; border-color:#A7F3D0;">🟢 3DEXPERIENCE Online</span>
+      <a class="btn-github" href="https://github.com/Shubhu1-ai/PLM_Hackathon" target="_blank">
+        <svg height="15" width="15" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        GitHub
+      </a>
     </div>
-  </aside>
+  </header>
 
-  <!-- Main Content Viewport -->
-  <div class="main-wrapper">
-    <!-- Top Bar -->
-    <header class="topbar">
-      <div class="topbar-left">
-        <span class="system-pill">⚡ ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</span>
-        <span style="font-size: 0.85rem; color: var(--text-muted);">Maturity: <b>IN_WORK</b> | Rev: <b>D</b></span>
+  <!-- Application Body -->
+  <div class="app-body">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-header-title">🧭 Compass Applications</div>
       </div>
-      <div class="topbar-right">
-        <a class="btn-repo" href="https://github.com/Shubhu1-ai/PLM_Hackathon" target="_blank">
-          <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-          </svg>
-          GitHub Repo
-        </a>
-      </div>
-    </header>
+      <ul class="nav-list">
+        <li class="nav-item active" onclick="switchView('view-dash', this)">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard & Analytics</span>
+        </li>
+        <li class="nav-item" onclick="switchView('view-bom', this)">
+          <span class="nav-icon">🌳</span>
+          <span>Product Structure (BOM)</span>
+        </li>
+        <li class="nav-item" onclick="switchView('view-impact', this)">
+          <span class="nav-icon">🔄</span>
+          <span>Change Impact Analysis</span>
+        </li>
+        <li class="nav-item" onclick="switchView('view-copilot', this)">
+          <span class="nav-icon">🤖</span>
+          <span>AI Engineering Copilot</span>
+        </li>
+      </ul>
 
-    <div class="content-area">
+      <div class="sidebar-footer">
+        <div style="font-weight: 800; color: var(--ds-blue);">410 kW Electric Drive Front</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);">Root: <code>ECAR-EI_FRONT</code></div>
+        <div style="margin-top: 4px;">Ref Mass: <b>100.100 kg</b> | <b>IN_WORK</b></div>
+        <div class="status-badge"><span class="status-dot"></span> ESILV Hackathon Edition</div>
+      </div>
+    </aside>
+
+    <!-- Content Viewport -->
+    <main class="content-area">
 
       <!-- VIEW 1: DASHBOARD & ANALYTICS -->
       <section id="view-dash" class="view-panel active">
         <div class="view-header">
-          <h1>📊 Executive Dashboard & Analytics</h1>
-          <p>Real-time engineering KPIs, mass distribution treemaps, and material compliance audits.</p>
+          <h1>📊 Information Intelligence (NETVIBES / Dashboard)</h1>
+          <p>Executive Power BI decision cockpit with live slicers, mass allocation visuals, and compliance audits.</p>
         </div>
 
-        <!-- Slicers Card -->
+        <!-- Slicers -->
         <div class="widget-card">
           <div class="widget-title">🎛️ Power BI Data Slicers</div>
           <div class="slicers-row">
             <div class="slicer-group">
               <label for="materialSlicer">Filter by Material:</label>
               <select id="materialSlicer" onchange="filterData()">
-                <option value="ALL">All Materials (Entire Assembly)</option>
-                <option value="Aluminium">Aluminium (10 parts)</option>
-                <option value="Steel">Steel (50+ parts)</option>
+                <option value="ALL">All Materials (100.100 kg Total Assembly)</option>
+                <option value="Aluminium">Aluminium (10 parts — 30.520 kg Casing)</option>
+                <option value="Steel">Steel (50+ parts — Rotors & Gears)</option>
                 <option value="Copper">Copper (Windings & Busbars)</option>
-                <option value="MISSING">⚠️ Missing / Unassigned (6 parts)</option>
+                <option value="MISSING">⚠️ Missing / Unassigned (6 compliance risks)</option>
               </select>
             </div>
             <div class="slicer-group">
@@ -668,7 +769,7 @@
         <!-- Charts Grid -->
         <div class="charts-grid">
           <div class="widget-card">
-            <div class="widget-title">⚖️ Subassembly Mass Breakdown</div>
+            <div class="widget-title">⚖️ Mass Share by Major Subassembly</div>
             <div class="chart-container">
               <canvas id="massPieChart"></canvas>
             </div>
@@ -681,7 +782,7 @@
           </div>
         </div>
 
-        <!-- Master Data Table -->
+        <!-- Component Table -->
         <div class="widget-card">
           <div class="widget-title">📋 Component Master Table (3DEXPERIENCE Export)</div>
           <div class="table-container">
@@ -697,28 +798,62 @@
                   <th>Organization</th>
                 </tr>
               </thead>
-              <tbody id="tableBody">
-                <!-- Injected via JavaScript -->
-              </tbody>
+              <tbody id="tableBody"></tbody>
             </table>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 2: PRODUCT STRUCTURE (BOM) -->
+      <!-- VIEW 2: PRODUCT STRUCTURE & 3D CAD VIEWER -->
       <section id="view-bom" class="view-panel">
         <div class="view-header">
-          <h1>🌳 Product Structure (Multi-Level BOM)</h1>
-          <p>Hierarchical expansion of the 410 kW Electric Drive Front Assembly with CAD property inspection.</p>
+          <h1>🌳 3D Modeling & BOM Structure (CATIA 3DPlay)</h1>
+          <p>Real-time interactive 3D WebGL assembly inspection, axial exploded views, and multi-level BOM hierarchy.</p>
         </div>
 
+        <!-- Interactive 3D CATIA WebGL Viewport -->
+        <div class="catia-3d-box">
+          <div class="catia-hud">
+            <div><b>3DEXPERIENCE CATIA 3DPlay</b> | 410 kW Electric Drive Front</div>
+            <div id="catiaHudPart" style="color:#94A3B8; margin-top:2px;">Selected: <b>ECAR-EI_410KW_EDRIVE_FRONT</b> (100.100 kg)</div>
+          </div>
+          <div id="three-viewport"></div>
+          <div class="catia-toolbar">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span>Explode Assembly:</span>
+              <input type="range" id="explodeSliderWeb" min="0" max="100" value="0" oninput="updateExplodeWeb(this.value)">
+              <span id="explodeValWeb" style="font-weight:700; color:#38BDF8;">0%</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-3d" onclick="toggleWireframeWeb()">Wireframe</button>
+              <button class="btn-3d" onclick="toggleCutawayWeb()">Cutaway View</button>
+              <button class="btn-3d" onclick="resetCameraWeb()">Reset View</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Static CAD Render Preview Card -->
+        <div class="widget-card" style="display:flex; gap:1.5rem; align-items:center;">
+          <img src="assets/ecar_edrive_cad_render.png" alt="CATIA Studio CAD Render" style="width:260px; height:auto; border-radius:8px; border:1px solid #CBD5E1; box-shadow:0 2px 6px rgba(0,0,0,0.1);" onerror="this.style.display='none'" />
+          <div>
+            <h3 style="color:var(--ds-blue); margin-bottom:0.5rem;">CATIA Studio 3D Cutaway Render (KeyShot Lighting)</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.5;">
+              Certified high-precision engineering render of the <b>410 kW Front Electric Drive Unit</b>. Illustrates precision-machined cast aluminium housing ribs, internal laminated stator core, copper hairpin windings, cylindrical central drive shaft, and planetary reduction differential.
+            </p>
+            <div style="margin-top:10px; font-size:0.82rem; color:#64748B;">
+              Certified PLM Extraction: <code>XPDMXML_ECAR_PLM.xml</code> | Declared System Mass: <b>100.100 kg</b>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOM Search -->
         <div class="widget-card">
-          <div class="widget-title">🔍 Interactive BOM Search & Inspector</div>
+          <div class="widget-title">🔍 Search Multi-Level BOM Structure</div>
           <input type="text" id="bomSearch" placeholder="Type component name or PLM ID (e.g., STATOR, HOUSING, prd-12535825-00000085)..." oninput="searchBOM()" style="width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 0.95rem; outline: none;" />
         </div>
 
+        <!-- Multi-Level Tree -->
         <div class="widget-card" id="bomContainer">
-          <!-- Multi-level tree nodes -->
           <div class="tree-node">
             <div class="tree-header" onclick="toggleTreeNode(this)">
               <div class="tree-title">📁 ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</div>
@@ -726,72 +861,46 @@
             </div>
             <div class="tree-children open">
               
-              <!-- Subassembly 1: E-Motor -->
+              <!-- E-Motor -->
               <div class="tree-node">
                 <div class="tree-header" onclick="toggleTreeNode(this)">
                   <div class="tree-title">📁 [inst_1] ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</div>
                   <div class="tree-meta">Subassembly: <b>39.730 kg</b> (39.7%)</div>
                 </div>
                 <div class="tree-children">
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_STATOR_STACK (prd-12535825-00000085)</div><div class="tree-meta">14.200 kg | Steel</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_ROTOR_ASSEMBLY (prd-12535825-00000086)</div><div class="tree-meta">12.500 kg | Steel / Magnets</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COPPER_WINDINGS (prd-12535825-00000087)</div><div class="tree-meta">7.850 kg | Copper</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_MOTOR_SHAFT (prd-12535825-00000088)</div><div class="tree-meta">3.650 kg | Steel</div></div>
-                  </div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_STATOR_STACK (prd-12535825-00000085)</div><div class="tree-meta">14.200 kg | Steel</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_ROTOR_ASSEMBLY (prd-12535825-00000086)</div><div class="tree-meta">12.500 kg | Steel / Magnets</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COPPER_WINDINGS (prd-12535825-00000087)</div><div class="tree-meta">7.850 kg | Copper</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_MOTOR_SHAFT (prd-12535825-00000088)</div><div class="tree-meta">3.650 kg | Steel</div></div></div>
                 </div>
               </div>
 
-              <!-- Subassembly 2: Housing -->
+              <!-- Housing -->
               <div class="tree-node">
                 <div class="tree-header" onclick="toggleTreeNode(this)">
                   <div class="tree-title">📁 [inst_2] ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</div>
                   <div class="tree-meta">Subassembly: <b>30.520 kg</b> (30.5%)</div>
                 </div>
                 <div class="tree-children">
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</div><div class="tree-meta">12.180 kg | Aluminium</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_REAR HOUSING (prd-12535825-00000055)</div><div class="tree-meta">13.780 kg | Aluminium</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_BEARING CARRIER (prd-12535825-00000056)</div><div class="tree-meta">2.450 kg | Aluminium</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER FRONT (prd-12535825-00000057)</div><div class="tree-meta">0.940 kg | Aluminium</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER REAR (prd-12535825-00000058)</div><div class="tree-meta">1.170 kg | Aluminium</div></div>
-                  </div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</div><div class="tree-meta">12.180 kg | Aluminium</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_REAR HOUSING (prd-12535825-00000055)</div><div class="tree-meta">13.780 kg | Aluminium</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_BEARING CARRIER (prd-12535825-00000056)</div><div class="tree-meta">2.450 kg | Aluminium</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER FRONT (prd-12535825-00000057)</div><div class="tree-meta">0.940 kg | Aluminium</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_COVER REAR (prd-12535825-00000058)</div><div class="tree-meta">1.170 kg | Aluminium</div></div></div>
                 </div>
               </div>
 
-              <!-- Subassembly 3: Reducer -->
+              <!-- Reducer -->
               <div class="tree-node">
                 <div class="tree-header" onclick="toggleTreeNode(this)">
                   <div class="tree-title">📁 [inst_3] ECAR-EI_REDUCER FRONT (prd-12535825-00000049)</div>
                   <div class="tree-meta">Subassembly: <b>29.850 kg</b> (29.8%)</div>
                 </div>
                 <div class="tree-children">
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_PLANETARY_CARRIER (prd-12535825-00000060)</div><div class="tree-meta">8.420 kg | Steel</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_SUN_GEAR (prd-12535825-00000061)</div><div class="tree-meta">3.120 kg | Steel</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_RING_GEAR (prd-12535825-00000062)</div><div class="tree-meta">7.200 kg | Steel</div></div>
-                  </div>
-                  <div class="tree-node">
-                    <div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_DIFFERENTIAL (prd-12535825-00000063)</div><div class="tree-meta">9.110 kg | Steel</div></div>
-                  </div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_PLANETARY_CARRIER (prd-12535825-00000060)</div><div class="tree-meta">8.420 kg | Steel</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_SUN_GEAR (prd-12535825-00000061)</div><div class="tree-meta">3.120 kg | Steel</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_RING_GEAR (prd-12535825-00000062)</div><div class="tree-meta">7.200 kg | Steel</div></div></div>
+                  <div class="tree-node"><div class="tree-header"><div class="tree-title">⚙️ ECAR-EI_DIFFERENTIAL (prd-12535825-00000063)</div><div class="tree-meta">9.110 kg | Steel</div></div></div>
                 </div>
               </div>
 
@@ -800,11 +909,11 @@
         </div>
       </section>
 
-      <!-- VIEW 3: CHANGE IMPACT ANALYSIS -->
+      <!-- VIEW 3: CHANGE IMPACT ANALYSIS (SIMULIA) -->
       <section id="view-impact" class="view-panel">
         <div class="view-header">
-          <h1>🔄 Engineering Change Impact Analysis</h1>
-          <p>Simulate Engineering Change Orders (ECO) with reverse Where-Used graph traversal and mass deltas.</p>
+          <h1>🔄 Content & Simulation (SIMULIA / Change Impact)</h1>
+          <p>Simulate Engineering Change Orders (ECO) with reverse Where-Used graph traversal and projected weight deltas.</p>
         </div>
 
         <div class="widget-card">
@@ -857,18 +966,16 @@
           </div>
 
           <div style="margin-top: 1rem;">
-            <h4 style="color: var(--dassault-blue); margin-bottom: 0.5rem;">Upstream Traceability Breadcrumbs (Where-Used Path)</h4>
-            <div id="breadcrumbsList" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">
-              <!-- Dynamic breadcrumbs -->
-            </div>
+            <h4 style="color: var(--ds-blue); margin-bottom: 0.5rem;">Upstream Traceability Breadcrumbs (Where-Used Path)</h4>
+            <div id="breadcrumbsList" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;"></div>
           </div>
         </div>
       </section>
 
-      <!-- VIEW 4: AI ENGINEERING COPILOT -->
+      <!-- VIEW 4: AI COPILOT (3DSWYM) -->
       <section id="view-copilot" class="view-panel">
         <div class="view-header">
-          <h1>🤖 AI Engineering Copilot</h1>
+          <h1>🤖 Collaborative AI (3DSwym / Engineering Copilot)</h1>
           <p>Live technical reasoning engine analyzing the 3DEXPERIENCE BOM with mandatory PLM ID citations.</p>
         </div>
 
@@ -876,9 +983,9 @@
           <div class="chat-messages" id="chatArea">
             <div class="chat-bubble bot">
               👋 Hello! I am your <b>3DEXPERIENCE AI Engineering Copilot</b>.<br><br>
-              I analyze the complete Bill of Materials for <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> with guaranteed PLM ID traceability.<br><br>
+              I analyze the complete Bill of Materials for <b>ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</b> with certified PLM ID traceability.<br><br>
               <i>Click a suggested query or type a question below:</i>
-              <div class="quick-prompts">
+              <div style="margin-top: 8px;">
                 <span class="prompt-chip" onclick="askCopilot('What parts use Aluminium?')">🔩 Parts using Aluminium</span>
                 <span class="prompt-chip" onclick="askCopilot('Show me the heaviest component.')">⚖️ Heaviest component</span>
                 <span class="prompt-chip" onclick="askCopilot('Are there any missing materials?')">🚨 Missing materials audit</span>
@@ -893,7 +1000,7 @@
         </div>
       </section>
 
-    </div>
+    </main>
   </div>
 
   <script>
@@ -925,15 +1032,14 @@
       { name: "ECAR-EI_GROUNDING_STRAP", plm: "prd-12535825-00000122", rev: "A", mat: "IN_WORK", mass: 0.025, material: "", org: "ECAR_SUPPLIER" }
     ];
 
-    // Navigation Switcher
     function switchView(viewId, navElement) {
       document.querySelectorAll('.view-panel').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.getElementById(viewId).classList.add('active');
       navElement.classList.add('active');
+      if (viewId === 'view-bom') onBOMViewOpened();
     }
 
-    // Render Master Table
     function renderTable(items) {
       const tbody = document.getElementById("tableBody");
       tbody.innerHTML = "";
@@ -955,7 +1061,6 @@
       });
     }
 
-    // Filter Slicer Logic
     function filterData() {
       const mat = document.getElementById("materialSlicer").value;
       let filtered = PRODUCTS;
@@ -972,11 +1077,9 @@
       document.getElementById("kpiMissing").innerText = missCount + " Parts";
     }
 
-    // Charts Initialization
-    let pieChart, barChart;
     function initCharts() {
       const ctxPie = document.getElementById('massPieChart').getContext('2d');
-      pieChart = new Chart(ctxPie, {
+      new Chart(ctxPie, {
         type: 'doughnut',
         data: {
           labels: ['E-Motor Front', 'Housing E-Drive', 'Reducer Front'],
@@ -993,7 +1096,7 @@
       });
 
       const ctxBar = document.getElementById('materialBarChart').getContext('2d');
-      barChart = new Chart(ctxBar, {
+      new Chart(ctxBar, {
         type: 'bar',
         data: {
           labels: ['Steel', 'Aluminium', 'Copper', 'Missing Material'],
@@ -1012,15 +1115,11 @@
       });
     }
 
-    // BOM Expand/Collapse
     function toggleTreeNode(header) {
       const children = header.nextElementSibling;
-      if (children) {
-        children.classList.toggle('open');
-      }
+      if (children) children.classList.toggle('open');
     }
 
-    // BOM Search
     function searchBOM() {
       const q = document.getElementById("bomSearch").value.toLowerCase().trim();
       const nodes = document.querySelectorAll("#bomContainer .tree-node");
@@ -1038,7 +1137,6 @@
       });
     }
 
-    // Change Impact
     function updateImpactInputs() {
       const sel = document.getElementById("impactSelect");
       const opt = sel.options[sel.selectedIndex];
@@ -1066,13 +1164,12 @@
         <div style="color: #64748B;">&nbsp;&nbsp;↳ via instance [inst_housing_mount]</div>
         <div><b>Level 1 (Parent):</b> ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</div>
         <div style="color: #64748B;">&nbsp;&nbsp;↳ via instance [inst_2]</div>
-        <div style="color: #005686; font-weight: bold;"><b>Level 2 (Root):</b> ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</div>
+        <div style="color: var(--ds-blue); font-weight: bold;"><b>Level 2 (Root):</b> ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047)</div>
       `;
 
       document.getElementById("simResultsCard").style.display = "block";
     }
 
-    // Copilot
     function askCopilot(prompt) {
       document.getElementById("chatInput").value = prompt;
       sendChat();
@@ -1090,7 +1187,7 @@
         let reply = "";
         const q = text.toLowerCase();
         if (q.includes("aluminium") || q.includes("aluminum")) {
-          reply = "🔩 <b>Components using Aluminium:</b><br><br>" +
+          reply = "🔩 <b>Components utilizing Aluminium (10 parts identified):</b><br><br>" +
             "• <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b> — 30.520 kg<br>" +
             "• <b>ECAR-EI_FRONT HOUSING (prd-12535825-00000054)</b> — 12.180 kg<br>" +
             "• <b>ECAR-EI_REAR HOUSING (prd-12535825-00000055)</b> — 13.780 kg<br>" +
@@ -1115,7 +1212,7 @@
             "<i>Action: Design release freeze risk prior to CAE sign-off.</i>";
         } else if (q.includes("subassemblies") || q.includes("subassembly") || q.includes("major")) {
           reply = "🏗️ <b>Major Subassemblies of ECAR-EI_410KW_EDRIVE_FRONT (prd-12535825-00000047):</b><br><br>" +
-            "1. <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b>: 39.730 kg (Electric Drive Machine)<br>" +
+            "1. <b>ECAR-EI_EMOTOR FRONT (prd-12535825-00000048)</b>: 39.730 kg (Electric Machine)<br>" +
             "2. <b>ECAR-EI_HOUSING FRONT EDRIVE (prd-12535825-00000050)</b>: 30.520 kg (Cast Aluminium Structural Shell)<br>" +
             "3. <b>ECAR-EI_REDUCER FRONT (prd-12535825-00000049)</b>: 29.850 kg (Planetary Gearbox & Differential)";
         } else {
@@ -1139,7 +1236,184 @@
       area.scrollTop = area.scrollHeight;
     }
 
-    // Window Load
+    // -------------------------------------------------------------
+    // THREE.JS 3D CATIA 3DPLAY VIEWER INITIALIZATION
+    // -------------------------------------------------------------
+    let scene, camera, renderer, controls, rootGroup;
+    let housingGroup, statorGroup, copperGroup, rotorGroup, reducerGroup, bearingGroup;
+    let aluMat, copperMat, steelMat, shaftMat, gearMat, bearingMat;
+    let threeInitialized = false;
+
+    function initThreeScene() {
+      const container = document.getElementById('three-viewport');
+      if (!container || threeInitialized) return;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0F172A);
+
+      camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(28, 18, 32);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      const amb = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(amb);
+
+      const dir1 = new THREE.DirectionalLight(0xffffff, 0.9);
+      dir1.position.set(30, 40, 20);
+      scene.add(dir1);
+
+      const dir2 = new THREE.DirectionalLight(0x38bdf8, 0.4);
+      dir2.position.set(-20, -10, -20);
+      scene.add(dir2);
+
+      const grid = new THREE.GridHelper(50, 25, 0x334155, 0x1E293B);
+      grid.position.y = -7;
+      scene.add(grid);
+
+      rootGroup = new THREE.Group();
+      scene.add(rootGroup);
+
+      // PBR Metallic Materials
+      aluMat = new THREE.MeshStandardMaterial({ color: 0x94A3B8, metalness: 0.85, roughness: 0.35 });
+      copperMat = new THREE.MeshStandardMaterial({ color: 0xD97706, metalness: 0.8, roughness: 0.25 });
+      steelMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9, roughness: 0.2 });
+      shaftMat = new THREE.MeshStandardMaterial({ color: 0xCBD5E1, metalness: 0.95, roughness: 0.15 });
+      gearMat = new THREE.MeshStandardMaterial({ color: 0x64748B, metalness: 0.85, roughness: 0.3 });
+      bearingMat = new THREE.MeshStandardMaterial({ color: 0x0284C7, metalness: 0.9, roughness: 0.2 });
+
+      // 1. Aluminium Housing
+      housingGroup = new THREE.Group();
+      const hMesh = new THREE.Mesh(new THREE.CylinderGeometry(6.2, 6.2, 14, 32, 1, true), aluMat);
+      hMesh.rotation.z = Math.PI / 2;
+      housingGroup.add(hMesh);
+      for (let i = -5; i <= 5; i += 2.5) {
+        const rib = new THREE.Mesh(new THREE.TorusGeometry(6.3, 0.25, 12, 32), aluMat);
+        rib.rotation.y = Math.PI / 2;
+        rib.position.x = i;
+        housingGroup.add(rib);
+      }
+      rootGroup.add(housingGroup);
+
+      // 2. Stator Stack
+      statorGroup = new THREE.Group();
+      const sMesh = new THREE.Mesh(new THREE.CylinderGeometry(5.7, 5.7, 10, 32), steelMat);
+      sMesh.rotation.z = Math.PI / 2;
+      statorGroup.add(sMesh);
+      rootGroup.add(statorGroup);
+
+      // 3. Copper Windings
+      copperGroup = new THREE.Group();
+      const c1 = new THREE.Mesh(new THREE.TorusGeometry(5.2, 0.9, 16, 32), copperMat);
+      c1.rotation.y = Math.PI / 2;
+      c1.position.x = -5.8;
+      copperGroup.add(c1);
+      const c2 = new THREE.Mesh(new THREE.TorusGeometry(5.2, 0.9, 16, 32), copperMat);
+      c2.rotation.y = Math.PI / 2;
+      c2.position.x = 5.8;
+      copperGroup.add(c2);
+      rootGroup.add(copperGroup);
+
+      // 4. Rotor & Central Drive Shaft
+      rotorGroup = new THREE.Group();
+      const rMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 8.5, 32), steelMat);
+      rMesh.rotation.z = Math.PI / 2;
+      rotorGroup.add(rMesh);
+      const shMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 22, 24), shaftMat);
+      shMesh.rotation.z = Math.PI / 2;
+      rotorGroup.add(shMesh);
+      rootGroup.add(rotorGroup);
+
+      // 5. Planetary Gearbox (Reducer)
+      reducerGroup = new THREE.Group();
+      const crMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 4.8, 3.5, 24), gearMat);
+      crMesh.rotation.z = Math.PI / 2;
+      reducerGroup.add(crMesh);
+      for (let angle = 0; angle < Math.PI * 2; angle += (Math.PI * 2) / 3) {
+        const pGear = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 3.6, 18), gearMat);
+        pGear.rotation.z = Math.PI / 2;
+        pGear.position.set(0, Math.cos(angle) * 2.6, Math.sin(angle) * 2.6);
+        reducerGroup.add(pGear);
+      }
+      reducerGroup.position.x = 9.5;
+      rootGroup.add(reducerGroup);
+
+      // 6. Deep Groove Bearing
+      bearingGroup = new THREE.Group();
+      const bRing = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.4, 16, 24), bearingMat);
+      bRing.rotation.y = Math.PI / 2;
+      bearingGroup.add(bRing);
+      bearingGroup.position.x = -8.5;
+      rootGroup.add(bearingGroup);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        rootGroup.rotation.y += 0.002;
+        controls.update();
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      threeInitialized = true;
+    }
+
+    function onBOMViewOpened() {
+      setTimeout(() => {
+        if (!threeInitialized) initThreeScene();
+        const container = document.getElementById('three-viewport');
+        if (renderer && container) {
+          renderer.setSize(container.clientWidth, container.clientHeight);
+          camera.aspect = container.clientWidth / container.clientHeight;
+          camera.updateProjectionMatrix();
+        }
+      }, 50);
+    }
+
+    function updateExplodeWeb(val) {
+      if (!housingGroup) return;
+      const factor = val / 100.0;
+      document.getElementById('explodeValWeb').innerText = val + "%";
+
+      housingGroup.position.x = -factor * 16;
+      statorGroup.position.x = -factor * 6;
+      copperGroup.position.x = -factor * 6;
+      rotorGroup.position.x = 0;
+      reducerGroup.position.x = 9.5 + (factor * 14);
+      bearingGroup.position.x = -8.5 - (factor * 12);
+    }
+
+    let isWireframeWeb = false;
+    function toggleWireframeWeb() {
+      isWireframeWeb = !isWireframeWeb;
+      [aluMat, copperMat, steelMat, shaftMat, gearMat, bearingMat].forEach(m => {
+        if (m) m.wireframe = isWireframeWeb;
+      });
+    }
+
+    let isCutawayWeb = false;
+    function toggleCutawayWeb() {
+      isCutawayWeb = !isCutawayWeb;
+      if (aluMat) {
+        aluMat.transparent = isCutawayWeb;
+        aluMat.opacity = isCutawayWeb ? 0.35 : 1.0;
+      }
+    }
+
+    function resetCameraWeb() {
+      if (!camera) return;
+      camera.position.set(28, 18, 32);
+      controls.target.set(0, 0, 0);
+      updateExplodeWeb(0);
+      document.getElementById('explodeSliderWeb').value = 0;
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       renderTable(PRODUCTS);
       initCharts();
