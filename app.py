@@ -6,6 +6,7 @@ Module: app.py
 
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 from typing import Dict, Any, Optional
 from plm_logic import get_engine, build_bom_tree, calculate_total_mass, get_where_used
 
@@ -270,13 +271,14 @@ if active_target_id:
 
 
 # ==========================================
-# 6. Four Main Views: Tabs
+# 6. Five Main Views: Tabs
 # ==========================================
-tab_bom, tab_risk, tab_impact, tab_chat = st.tabs([
+tab_bom, tab_risk, tab_impact, tab_chat, tab_viz = st.tabs([
     "🌳 Product Explorer",
     "⚠️ Risk Intelligence",
     "🔄 Change Impact Analysis",
-    "🤖 PLM AI Assistant"
+    "🤖 PLM AI Assistant",
+    "📊 Advanced Visualizations"
 ])
 
 
@@ -604,3 +606,110 @@ with tab_chat:
             st.session_state.real_chat_history.append({"role": "assistant", "content": reply})
             with st.chat_message("assistant"):
                 st.markdown(reply)
+
+
+# ------------------------------------------
+# TAB 5: ADVANCED VISUALIZATIONS
+# ------------------------------------------
+with tab_viz:
+    st.markdown("### 📊 Advanced Engineering Visualizations")
+    st.caption("Interactive multi-dimensional charts for mass distribution and material risk audits.")
+
+    # -------------------------------------------------------------
+    # Visual 1: BOM Sunburst Chart (Mass Distribution)
+    # -------------------------------------------------------------
+    st.subheader("☀️ BOM Sunburst Chart (Hierarchical Mass Breakdown)")
+    st.markdown(
+        "Click on any assembly slice to zoom in and inspect its internal subassemblies and parts. "
+        "The arc size represents each component's mass contribution in kilograms."
+    )
+
+    # Flatten the tree into Sunburst rows (id, label, parent, mass, material)
+    sunburst_rows = []
+    def extract_sunburst_data(node, parent_id="", path_prefix="root"):
+        current_id = path_prefix
+        name = node["name"]
+        inst = node.get("instance_name") or ""
+        display_label = f"[{inst}] {name}" if inst else name
+        mass_val = max(float(node.get("mass", 0.0)), 0.0001)
+        material_val = node.get("material") or "⚠️ Unassigned Material"
+
+        sunburst_rows.append({
+            "id": current_id,
+            "label": display_label,
+            "parent": parent_id,
+            "mass": mass_val,
+            "material": material_val,
+            "plm_id": node.get("plm_id", "")
+        })
+
+        for i, child in enumerate(node.get("children", [])):
+            extract_sunburst_data(child, parent_id=current_id, path_prefix=f"{current_id}_{i}_{child['xml_id']}")
+
+    extract_sunburst_data(bom_tree, parent_id="", path_prefix="root")
+    df_sunburst = pd.DataFrame(sunburst_rows)
+
+    fig_sunburst = px.sunburst(
+        df_sunburst,
+        ids="id",
+        names="label",
+        parents="parent",
+        values="mass",
+        color="material",
+        title="Interactive E-Drive BOM Mass Distribution (Click to Zoom)",
+        hover_data={"plm_id": True, "mass": ":.3f kg"},
+        color_discrete_map={"⚠️ Unassigned Material": "#EF4444"}
+    )
+    fig_sunburst.update_layout(
+        margin=dict(t=40, l=10, r=10, b=10),
+        height=620
+    )
+    st.plotly_chart(fig_sunburst, use_container_width=True)
+
+    st.divider()
+
+    # -------------------------------------------------------------
+    # Visual 2: Material Distribution Treemap & Bar Chart
+    # -------------------------------------------------------------
+    st.subheader("🗺️ Material Allocation & Compliance Risk")
+    st.markdown(
+        "Visualizes component counts across materials. "
+        "Components marked **⚠️ Missing / Unassigned** indicate immediate compliance and CAE simulation risks."
+    )
+
+    mat_df = products_df.copy()
+    mat_df["material_clean"] = mat_df["material"].apply(lambda m: "⚠️ Missing / Unassigned" if not m else m)
+    mat_summary = mat_df["material_clean"].value_counts().reset_index()
+    mat_summary.columns = ["Material", "Component Count"]
+
+    vcol1, vcol2 = st.columns(2)
+
+    with vcol1:
+        fig_treemap = px.treemap(
+            mat_summary,
+            path=["Material"],
+            values="Component Count",
+            color="Material",
+            title="Material Distribution Treemap",
+            color_discrete_map={"⚠️ Missing / Unassigned": "#DC2626"}
+        )
+        fig_treemap.update_layout(margin=dict(t=40, l=10, r=10, b=10), height=450)
+        st.plotly_chart(fig_treemap, use_container_width=True)
+
+    with vcol2:
+        fig_bar = px.bar(
+            mat_summary,
+            x="Component Count",
+            y="Material",
+            orientation="h",
+            color="Material",
+            title="Component Count by Material Assignment",
+            text="Component Count",
+            color_discrete_map={"⚠️ Missing / Unassigned": "#DC2626"}
+        )
+        fig_bar.update_layout(
+            margin=dict(t=40, l=10, r=10, b=10),
+            height=450,
+            yaxis=dict(autorange="reversed")
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
